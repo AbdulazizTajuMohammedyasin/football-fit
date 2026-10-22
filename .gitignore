@@ -23,3 +23,8 @@ frontend/dist/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local AI assistant instructions (kept out of the repository)
+claude.md
+CLAUDE.md
+.claude/
