@@ -6,6 +6,7 @@ import { createBrowserRouter, Link, RouterProvider } from 'react-router'
 import { Layout } from '@/components/Layout'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { ClubPage } from '@/pages/ClubPage'
+import { ComparePage } from '@/pages/ComparePage'
 import { HomePage } from '@/pages/HomePage'
 import { PlayerPage } from '@/pages/PlayerPage'
 import { ShortlistPage } from '@/pages/ShortlistPage'
@@ -37,6 +38,7 @@ const router = createBrowserRouter([
       { path: 'clubs/:slug', element: <ClubPage /> },
       { path: 'clubs/:slug/shortlist', element: <ShortlistPage /> },
       { path: 'players/:slug', element: <PlayerPage /> },
+      { path: 'compare', element: <ComparePage /> },
       { path: '*', element: <NotFound /> },
     ],
   },
