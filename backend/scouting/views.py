@@ -186,13 +186,8 @@ def player_detail(request, slug):
     if league is None or player.id not in league.seasons:
         return Response(
             {
-                "player": {
-                    "slug": player.slug,
-                    "name": player.name,
-                    "position": player.position,
-                    "position_label": Position(player.position).label,
-                    "club": s.club_summary(player.club) if player.club else None,
-                },
+                "player": s.player_summary(player, None),
+                "source": s.source_data(player.source),
                 "season": None,
                 "metrics": [],
                 "role_scores": [],

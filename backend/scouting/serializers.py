@@ -98,16 +98,18 @@ def fit_data(fit: FitScore) -> dict:
     }
 
 
-def player_summary(player: Player, league: League) -> dict:
-    season = league.seasons.get(player.id)
+def player_summary(player: Player, league: League | None) -> dict:
+    """Player profile; without a league (no season data) only the profile fields are filled."""
+    season = league.seasons.get(player.id) if league else None
     club = season.club if season and season.club_id else player.club
+    as_of = league.as_of if league else player.source.as_of
     return {
         "slug": player.slug,
         "name": player.name,
         "position": player.position,
         "position_label": Position(player.position).label,
         "secondary_positions": list(player.secondary_positions or []),
-        "age": player.age_on(league.as_of),
+        "age": player.age_on(as_of),
         "nationality": player.nationality or None,
         "preferred_foot": player.preferred_foot or None,
         "club": club_summary(club) if club else None,

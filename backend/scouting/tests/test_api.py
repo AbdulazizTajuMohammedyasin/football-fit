@@ -111,6 +111,8 @@ def test_player_without_season_returns_empty_evidence(client, demo):
     data = client.get("/api/players/no-season/").json()
     assert data["season"] is None
     assert data["metrics"] == []
+    assert data["player"]["minutes"] is None
+    assert data["source"]["is_demo"] is True
 
 
 def test_player_search(client, demo):
