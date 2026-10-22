@@ -41,15 +41,18 @@ Done and committed:
 6. Read-only API: meta, clubs, club detail, needs, recommendations (validated filters), players, player detail, compare. 68 backend tests passing.
 7. Frontend scaffold: Vite + TS + Tailwind + shadcn/ui + TanStack Query + router, typed API client, demo-data notice, club picker, club needs/squad page. Production build passing.
 
-Known gap at the checkpoint: needs-page "Find a …" links point to `/clubs/:slug/shortlist`, which does not exist yet (shows "Page not found").
+### Day 2 — Complete the core user journey (frontend) ✅ (complete)
 
-### Day 2 — Complete the core user journey (frontend)
+Done and committed:
 
-1. Shortlist page: role selector, working filters (age range, minimum minutes, include incomplete data, include out-of-position), filters kept in the URL, fit-score breakdown, coverage flags, select players to compare.
-2. Player evidence page: metric percentiles with raw values, missing values flagged, role scores per profile, coverage and low-minutes warnings.
-3. Compare page: player search, add/remove (2–4), role switcher, side-by-side metric table.
-4. Methodology page driven by `/api/meta/` (roles, weights, thresholds, data sources and licence notes).
-5. Frontend unit tests (Vitest + Testing Library) for formatting, API client error handling and key components.
+1. Shortlist page: role selector, validated filters (age range, minimum minutes) kept in the URL, opt-in incomplete-data and out-of-position toggles, fit-score and role-metric breakdowns, selection for comparison.
+2. Player evidence page: profile facts, role scores per profile, all relevant metrics with missing values labelled, small-sample and coverage warnings. API fix: players without season data return a full profile.
+3. Compare page: player search, add/remove (2–4), role switcher, side-by-side metric table with best-value shading.
+4. Methodology page rendered from `/api/meta/`.
+5. Vitest + Testing Library: 27 tests (formatting, URL/filter parsing, API client errors, club picker states, shortlist filters, missing-metric rendering).
+6. Manual check with the dev servers and headless Chrome screenshots (club needs, shortlist, player, compare, narrow width ~500 px); fixed need-bar colours, "a/an" wording and compare-button layout.
+
+Carried to Day 4: true 390 px phone-width check (headless Chrome here cannot go below ~500 px); the methodology page hard-codes the need-level thresholds (60/35) instead of reading them from the API.
 
 ### Day 3 — Accounts and saved shortlists (djoser + JWT), PostgreSQL readiness
 
