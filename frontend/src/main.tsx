@@ -7,6 +7,7 @@ import { Layout } from '@/components/Layout'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { ClubPage } from '@/pages/ClubPage'
 import { HomePage } from '@/pages/HomePage'
+import { ShortlistPage } from '@/pages/ShortlistPage'
 
 import './index.css'
 
@@ -33,6 +34,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: 'clubs/:slug', element: <ClubPage /> },
+      { path: 'clubs/:slug/shortlist', element: <ShortlistPage /> },
       { path: '*', element: <NotFound /> },
     ],
   },

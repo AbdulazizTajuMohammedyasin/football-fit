@@ -40,3 +40,9 @@ export function scoreTone(score: number | null | undefined): string {
   if (score >= 35) return 'bg-amber-500'
   return 'bg-rose-500'
 }
+
+export function ordinal(n: number): string {
+  const mod100 = n % 100
+  if (mod100 >= 11 && mod100 <= 13) return `${n}th`
+  return `${n}${{ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th'}`
+}
