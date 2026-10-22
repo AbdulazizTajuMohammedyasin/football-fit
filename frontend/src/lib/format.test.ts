@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatAge, formatMetric, formatNumber, formatScore, NOT_RECORDED, ordinal } from './format'
+import { formatAge, formatMetric, formatNumber, formatScore, NOT_RECORDED, ordinal, scoreTone, withArticle } from './format'
 
 describe('format helpers', () => {
   it('keeps missing values visibly missing instead of showing zero', () => {
@@ -29,5 +29,19 @@ describe('format helpers', () => {
       '22nd',
       '100th',
     ])
+  })
+})
+
+describe('scoreTone and withArticle', () => {
+  it('inverts colour bands for need scores', () => {
+    expect(scoreTone(90)).toBe('bg-emerald-600')
+    expect(scoreTone(90, true)).toBe('bg-rose-500')
+    expect(scoreTone(0, true)).toBe('bg-emerald-600')
+    expect(scoreTone(null, true)).toBe('bg-muted-foreground/30')
+  })
+
+  it('chooses a or an', () => {
+    expect(withArticle('anchor')).toBe('an anchor')
+    expect(withArticle('stopper')).toBe('a stopper')
   })
 })

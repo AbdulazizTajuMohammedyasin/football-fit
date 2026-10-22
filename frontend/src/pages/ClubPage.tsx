@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { formatAge, formatNumber, formatScore } from '@/lib/format'
+import { formatAge, formatNumber, formatScore, withArticle } from '@/lib/format'
 
 function NeedCard({ need, clubSlug }: { need: PositionNeed; clubSlug: string }) {
   return (
@@ -30,7 +30,7 @@ function NeedCard({ need, clubSlug }: { need: PositionNeed; clubSlug: string }) 
         </div>
       </div>
 
-      <ScoreBar value={need.score} label={`${need.label} need score`} className="mt-3" />
+      <ScoreBar value={need.score} label={`${need.label} need score`} className="mt-3" invert />
 
       <dl className="mt-4 grid gap-3 sm:grid-cols-3">
         {need.components.map((component) => (
@@ -40,7 +40,7 @@ function NeedCard({ need, clubSlug }: { need: PositionNeed; clubSlug: string }) 
               <span>weight {Math.round(component.weight * 100)}%</span>
             </dt>
             <dd className="flex items-center gap-2">
-              <ScoreBar value={component.value} label={component.label} />
+              <ScoreBar value={component.value} label={component.label} invert />
               <span className="w-10 text-right text-sm tabular-nums">
                 {component.value === null ? 'n/a' : Math.round(component.value)}
               </span>
@@ -59,7 +59,7 @@ function NeedCard({ need, clubSlug }: { need: PositionNeed; clubSlug: string }) 
         {need.roles.map((role) => (
           <Button key={role.key} asChild variant={need.level === 'high' ? 'default' : 'outline'} size="sm">
             <Link to={`/clubs/${clubSlug}/shortlist?role=${role.key}`}>
-              Find a {role.name.toLowerCase()} <ArrowRight aria-hidden />
+              Find {withArticle(role.name.toLowerCase())} <ArrowRight aria-hidden />
             </Link>
           </Button>
         ))}

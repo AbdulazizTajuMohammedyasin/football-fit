@@ -373,7 +373,7 @@ export function ShortlistPage() {
                       <GitCompareArrows aria-hidden /> Compare {selected.length}
                     </Link>
                   ) : (
-                    <span>
+                    <span className="inline-flex items-center gap-2">
                       <GitCompareArrows aria-hidden /> Select 2–{MAX_COMPARE} to compare
                     </span>
                   )}

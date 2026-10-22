@@ -7,10 +7,13 @@ export function ScoreBar({
   value,
   label,
   className,
+  invert = false,
 }: {
   value: number | null | undefined
   label: string
   className?: string
+  /** Colour high values as bad (need scores). */
+  invert?: boolean
 }) {
   const missing = value === null || value === undefined
   return (
@@ -29,17 +32,8 @@ export function ScoreBar({
       )}
     >
       {!missing && (
-        <div className={cn('h-full rounded-full', scoreTone(value))} style={{ width: `${Math.max(value, 2)}%` }} />
+        <div className={cn('h-full rounded-full', scoreTone(value, invert))} style={{ width: `${Math.max(value, 2)}%` }} />
       )}
-    </div>
-  )
-}
-
-export function ScorePill({ value, label }: { value: number | null | undefined; label: string }) {
-  return (
-    <div className="flex flex-col items-end">
-      <span className="text-2xl font-semibold tabular-nums leading-none">{formatScore(value)}</span>
-      <span className="text-xs text-muted-foreground">{label}</span>
     </div>
   )
 }

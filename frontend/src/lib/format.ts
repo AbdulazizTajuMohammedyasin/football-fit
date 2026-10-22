@@ -32,9 +32,13 @@ export function formatDate(iso: string): string {
   })
 }
 
-/** Tailwind classes for a 0–100 score band. */
-export function scoreTone(score: number | null | undefined): string {
+/**
+ * Tailwind classes for a 0–100 score band. With `invert`, high values are bad
+ * (used for need scores, where 100 means an urgent need).
+ */
+export function scoreTone(score: number | null | undefined, invert = false): string {
   if (score === null || score === undefined) return 'bg-muted-foreground/30'
+  if (invert) score = 100 - score
   if (score >= 75) return 'bg-emerald-600'
   if (score >= 55) return 'bg-emerald-500/80'
   if (score >= 35) return 'bg-amber-500'
@@ -45,4 +49,9 @@ export function ordinal(n: number): string {
   const mod100 = n % 100
   if (mod100 >= 11 && mod100 <= 13) return `${n}th`
   return `${n}${{ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th'}`
+}
+
+/** "a striker", "an anchor". */
+export function withArticle(noun: string): string {
+  return `${/^[aeiou]/i.test(noun) ? 'an' : 'a'} ${noun}`
 }
