@@ -7,7 +7,15 @@ import { renderRoute, stubApi } from '@/test/render'
 import { ShortlistPage } from './ShortlistPage'
 
 const source = { slug: 'demo', name: 'Demo', is_demo: true, licence: '', url: '', notes: '', as_of: '2026-05-31' }
-const league = { source, competition: 'Demo League', season: '2025-26', as_of: '2026-05-31' }
+const league = {
+  source,
+  competition: 'Demo League',
+  season: '2025-26',
+  as_of: '2026-05-31',
+  thresholds: { benchmark_min_minutes: 450, full_reliability_minutes: 1200 },
+  positions: ['ST'],
+  available_roles: ['st-poacher'],
+}
 const club = { slug: 'a', name: 'Ashcombe Albion', short_name: 'Ashcombe', competition: 'Demo League', is_demo: true }
 const role = {
   key: 'st-poacher',
@@ -23,8 +31,10 @@ const meta = {
   roles: [role],
   scoring: {
     benchmark_min_minutes: 900,
+    benchmark_share_of_max: 0.3,
     reliable_coverage: 0.7,
     full_reliability_minutes: 2500,
+    reliability_share_of_max: 0.75,
     fit_weights: {},
     need_weights: {},
     ageing_threshold: 31,
@@ -99,6 +109,8 @@ describe('ShortlistPage', () => {
     expect(screen.getByText('Incomplete data · 60%')).toBeInTheDocument()
     expect(screen.getByText(/1 hidden because less than 70%/)).toBeInTheDocument()
     expect(screen.getByText(/best established player in this role scores 61.2/)).toBeInTheDocument()
+    // The minutes placeholder reflects the league's own threshold.
+    expect(screen.getByLabelText('Minimum league minutes')).toHaveAttribute('placeholder', '450')
   })
 
   it('validates filters before requesting and sends valid ones to the API', async () => {

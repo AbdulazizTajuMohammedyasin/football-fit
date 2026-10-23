@@ -31,6 +31,7 @@ def test_club_list(client, demo):
     data = client.get("/api/clubs/").json()
     assert len(data) == 20
     assert all(c["is_demo"] for c in data)
+    assert all(c["source_name"] == "Football Fit demo dataset (fictional)" for c in data)
     assert all(c["squad_size"] > 0 for c in data)
 
 
@@ -126,6 +127,8 @@ def test_compare_players_on_shared_role(client, demo):
     strikers = list(Player.objects.filter(position="ST").values_list("slug", flat=True)[:3])
     data = client.get(f"/api/compare/?players={','.join(strikers)}&role=st-complete").json()
     assert data["role"]["key"] == "st-complete"
+    assert "st-complete" in data["available_roles"]
+    assert "fw-finisher" not in data["available_roles"]  # FPL-only metrics
     assert [p["player"]["slug"] for p in data["players"]] == strikers
 
 

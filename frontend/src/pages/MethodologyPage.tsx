@@ -97,7 +97,9 @@ export function MethodologyPage() {
       <Section id="role-score" title="Role scores">
         <p>
           Each metric is turned into a percentile (0–100) against players in the same position and competition
-          who played at least {scoring.benchmark_min_minutes} league minutes. For metrics where lower is better —
+          who played at least {scoring.benchmark_min_minutes} league minutes — or, early in a season,{' '}
+          {formatPercent(scoring.benchmark_share_of_max)} of the most minutes anyone has played so far, if that is
+          lower. For metrics where lower is better —
           such as being dribbled past — the scale is flipped so 100 is always best. The role score is the weighted
           average of the available percentiles using the role profile's weights below.
         </p>
@@ -107,7 +109,8 @@ export function MethodologyPage() {
         <p>
           Shortlists rank players by a fit score that combines three components. When a component has no data
           (for example, minutes were not recorded) it is left out and the remaining weights are rescaled.
-          Reliability reaches 100 at {scoring.full_reliability_minutes} minutes.
+          Reliability reaches 100 at {scoring.full_reliability_minutes} minutes (or{' '}
+          {formatPercent(scoring.reliability_share_of_max)} of the most minutes played so far, early in a season).
         </p>
         <WeightList weights={scoring.fit_weights} labels={FIT_LABELS} />
       </Section>

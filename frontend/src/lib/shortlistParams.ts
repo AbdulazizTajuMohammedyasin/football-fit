@@ -2,7 +2,6 @@ import type { ShortlistParams } from '@/api/queries'
 
 export const AGE_MIN = 15
 export const AGE_MAX = 45
-export const DEFAULT_MIN_MINUTES = 900
 
 function parseInteger(value: string | null, min: number, max: number): number | null {
   if (value === null || value.trim() === '') return null

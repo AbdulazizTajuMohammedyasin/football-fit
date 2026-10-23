@@ -72,8 +72,17 @@ def meta(request):
 
 @api_view(["GET"])
 def club_list(request):
-    clubs = Club.objects.select_related("source").annotate(squad_size=Count("players"))
-    return Response([{**s.club_summary(club), "squad_size": club.squad_size} for club in clubs])
+    clubs = (
+        Club.objects.select_related("source")
+        .annotate(squad_size=Count("players"))
+        .order_by("source__is_demo", "source__name", "name")
+    )
+    return Response(
+        [
+            {**s.club_summary(club), "squad_size": club.squad_size, "source_name": club.source.name}
+            for club in clubs
+        ]
+    )
 
 
 def _get_club(slug: str) -> Club:
@@ -289,11 +298,6 @@ def compare(request):
         {
             **s.league_meta(league),
             "role": s.role_data(role),
-            "available_roles": [
-                s.role_data(r)
-                for position in league.context.positions
-                for r in league.context.available_roles(position)
-            ],
             "players": entries,
         }
     )

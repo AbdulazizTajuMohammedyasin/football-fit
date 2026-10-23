@@ -18,7 +18,6 @@ import { formatAge, formatNumber, formatScore } from '@/lib/format'
 import {
   AGE_MAX,
   AGE_MIN,
-  DEFAULT_MIN_MINUTES,
   parseShortlistParams,
   toSearchParams,
   validateDraft,
@@ -137,10 +136,12 @@ function ResultCard({
 
 function FilterForm({
   params,
+  defaultMinMinutes,
   onApply,
   onReset,
 }: {
   params: ShortlistParams | null
+  defaultMinMinutes: number
   onApply: (values: Pick<ShortlistParams, 'min_age' | 'max_age' | 'min_minutes'>) => void
   onReset: () => void
 }) {
@@ -194,7 +195,7 @@ function FilterForm({
         <Input
           id="min-minutes"
           inputMode="numeric"
-          placeholder={String(DEFAULT_MIN_MINUTES)}
+          placeholder={String(defaultMinMinutes)}
           value={draft.minMinutes}
           disabled={!params}
           onChange={(event) => setDraft({ ...draft, minMinutes: event.target.value })}
@@ -299,6 +300,7 @@ export function ShortlistPage() {
               id="role"
               roles={meta.data.roles}
               positions={meta.data.positions}
+              allowed={club.data.available_roles}
               value={role?.key ?? ''}
               onChange={(value) => update({ role: value })}
             />
@@ -322,6 +324,7 @@ export function ShortlistPage() {
           <FilterForm
             key={searchParams.toString()}
             params={params}
+            defaultMinMinutes={club.data.thresholds.benchmark_min_minutes}
             onApply={(values) => update(values)}
             onReset={resetFilters}
           />

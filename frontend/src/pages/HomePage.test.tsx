@@ -7,8 +7,8 @@ import { renderRoute, stubApi } from '@/test/render'
 import { HomePage } from './HomePage'
 
 const clubs = [
-  { slug: 'a', name: 'Ashcombe Albion', short_name: 'Ashcombe', competition: 'Demo League', is_demo: true, squad_size: 22 },
-  { slug: 'b', name: 'Brackenford City', short_name: 'Brackenford', competition: 'Demo League', is_demo: true, squad_size: 24 },
+  { slug: 'a', name: 'Ashcombe Albion', short_name: 'Ashcombe', competition: 'Demo League', is_demo: true, squad_size: 22, source_name: 'Demo source' },
+  { slug: 'b', name: 'Brackenford City', short_name: 'Brackenford', competition: 'Demo League', is_demo: true, squad_size: 24, source_name: 'Demo source' },
 ]
 
 afterEach(() => {
@@ -22,6 +22,7 @@ describe('HomePage', () => {
 
     expect(await screen.findByText('Ashcombe Albion')).toBeInTheDocument()
     expect(screen.getAllByText('Demo')).toHaveLength(2)
+    expect(screen.getByText('Fictional demo data')).toBeInTheDocument()
 
     await userEvent.type(screen.getByLabelText('Filter clubs'), 'brack')
     expect(screen.queryByText('Ashcombe Albion')).not.toBeInTheDocument()

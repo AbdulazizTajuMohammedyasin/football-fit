@@ -55,7 +55,7 @@ export function PlayerPage() {
   const units = new Map((meta.data?.metrics ?? []).map((metric) => [metric.key, metric.unit]))
   const missingCount = data.metrics.filter((metric) => metric.missing).length
   const poolSize = Math.max(0, ...data.metrics.map((metric) => metric.pool_size))
-  const minMinutes = meta.data?.scoring.benchmark_min_minutes ?? 900
+  const minMinutes = data.thresholds?.benchmark_min_minutes ?? meta.data?.scoring.benchmark_min_minutes ?? 900
 
   const facts: [string, string][] = [
     ['Club', info.club?.name ?? 'No club'],

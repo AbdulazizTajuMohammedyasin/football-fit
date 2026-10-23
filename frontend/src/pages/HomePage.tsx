@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 
 import { useClubs } from '@/api/queries'
+import type { ClubListItem } from '@/api/types'
 import { EmptyState, ErrorState, LoadingState } from '@/components/states'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -22,6 +23,15 @@ export function HomePage() {
     const term = search.trim().toLowerCase()
     return (clubs.data ?? []).filter((club) => club.name.toLowerCase().includes(term))
   }, [clubs.data, search])
+
+  // One group per data source, so real and fictional clubs are never mixed together.
+  const groups = useMemo(() => {
+    const bySource = new Map<string, ClubListItem[]>()
+    for (const club of filtered) {
+      bySource.set(club.source_name, [...(bySource.get(club.source_name) ?? []), club])
+    }
+    return [...bySource.entries()]
+  }, [filtered])
 
   return (
     <div className="space-y-10">
@@ -69,33 +79,48 @@ export function HomePage() {
           <ErrorState error={clubs.error} onRetry={() => clubs.refetch()} title="Could not load clubs" />
         ) : !clubs.data.length ? (
           <EmptyState title="No clubs loaded yet">
-            Load the demo dataset with <code>python manage.py seed_demo</code>, or import licensed data with{' '}
-            <code>import_players_csv</code>.
+            Import current Premier League data with <code>python manage.py import_fpl</code>, load the fictional
+            demo league with <code>seed_demo</code>, or import licensed data with <code>import_players_csv</code>.
           </EmptyState>
         ) : !filtered.length ? (
           <EmptyState title={`No clubs match “${search}”`} />
         ) : (
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((club) => (
-              <li key={club.slug}>
-                <Link
-                  to={`/clubs/${club.slug}`}
-                  className="group flex items-center justify-between rounded-lg border bg-card px-4 py-3 transition-colors hover:border-primary/50 hover:bg-accent focus-visible:outline-2"
-                >
-                  <span>
-                    <span className="block font-medium">{club.name}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {club.competition} · {club.squad_size} players
-                    </span>
-                  </span>
-                  <span className="flex items-center gap-2">
-                    {club.is_demo && <Badge variant="outline">Demo</Badge>}
-                    <ChevronRight className="size-4 text-muted-foreground group-hover:text-foreground" aria-hidden />
-                  </span>
-                </Link>
-              </li>
+          <div className="space-y-6">
+            {groups.map(([sourceName, group]) => (
+              <section key={sourceName} aria-label={sourceName} className="space-y-2">
+                <h3 className="flex flex-wrap items-center gap-2 text-sm font-medium text-muted-foreground">
+                  {group[0].competition} · {sourceName}
+                  {group[0].is_demo ? (
+                    <Badge variant="outline">Fictional demo data</Badge>
+                  ) : (
+                    <Badge variant="outline">Real data</Badge>
+                  )}
+                </h3>
+                <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {group.map((club) => (
+                    <li key={club.slug}>
+                      <Link
+                        to={`/clubs/${club.slug}`}
+                        className="group flex items-center justify-between rounded-lg border bg-card px-4 py-3 transition-colors hover:border-primary/50 hover:bg-accent focus-visible:outline-2"
+                      >
+                        <span>
+                          <span className="block font-medium">{club.name}</span>
+                          <span className="text-sm text-muted-foreground">{club.squad_size} listed players</span>
+                        </span>
+                        <span className="flex items-center gap-2">
+                          {club.is_demo && <Badge variant="outline">Demo</Badge>}
+                          <ChevronRight
+                            className="size-4 text-muted-foreground group-hover:text-foreground"
+                            aria-hidden
+                          />
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             ))}
-          </ul>
+          </div>
         )}
       </section>
     </div>

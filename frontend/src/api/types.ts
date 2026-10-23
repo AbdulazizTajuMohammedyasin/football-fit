@@ -20,6 +20,7 @@ export interface ClubSummary {
 
 export interface ClubListItem extends ClubSummary {
   squad_size: number
+  source_name: string
 }
 
 export interface LeagueMeta {
@@ -27,6 +28,12 @@ export interface LeagueMeta {
   competition: string
   season: string | null
   as_of: string
+  /** League-relative minute thresholds (lower early in a season). */
+  thresholds: { benchmark_min_minutes: number; full_reliability_minutes: number }
+  /** Positions present in this league's data. */
+  positions: string[]
+  /** Role keys this league's metrics can support. */
+  available_roles: string[]
 }
 
 export interface RoleWeight {
@@ -64,8 +71,10 @@ export interface Meta {
   roles: Role[]
   scoring: {
     benchmark_min_minutes: number
+    benchmark_share_of_max: number
     reliable_coverage: number
     full_reliability_minutes: number
+    reliability_share_of_max: number
     fit_weights: Record<string, number>
     need_weights: Record<string, number>
     ageing_threshold: number
@@ -215,6 +224,5 @@ export interface CompareEntry {
 
 export interface Comparison extends LeagueMeta {
   role: Role
-  available_roles: Role[]
   players: CompareEntry[]
 }

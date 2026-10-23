@@ -229,6 +229,7 @@ export function ComparePage() {
               id="compare-role"
               roles={meta.data.roles}
               positions={meta.data.positions}
+              allowed={comparison.data?.available_roles}
               value={comparison.data?.role.key ?? roleParam ?? ''}
               onChange={setRole}
             />
