@@ -54,15 +54,24 @@ Done and committed:
 
 Carried to Day 4: true 390 px phone-width check (headless Chrome here cannot go below ~500 px); the methodology page hard-codes the need-level thresholds (60/35) instead of reading them from the API.
 
-### Day 3 — Accounts and saved shortlists (djoser + JWT), PostgreSQL readiness
+### Day 3 — Real data, MySQL, accounts and saved shortlists ✅ (complete)
 
-1. Add djoser + `djangorestframework-simplejwt`: register, obtain/refresh token, current user. Tests.
-2. Saved shortlist model + authenticated CRUD API (user can only see/modify their own); migration and tests.
-3. Frontend: sign-in/sign-up, token handling with refresh, "Save to my shortlist" from the shortlist and player pages, "My shortlists" page.
-4. `docker-compose.yml` for PostgreSQL; verify migrations and tests against PostgreSQL **if a PostgreSQL server is available** (currently not installed — otherwise documented as unverified).
+Owner decisions on 2026-10-24: use the Fantasy Premier League API for real data, and MySQL instead of PostgreSQL.
+
+Done and committed:
+
+1. MySQL as the target database (`mysqlclient`, utf8mb4, strict mode, `docs/database.md`); a JSON lookup replaced so queries behave the same on MySQL and SQLite.
+2. League-relative minute thresholds (capped at 30 % / 75 % of the most minutes played) so a part-played season still has benchmarks; depth counts players who have actually played; needs and role lists cover only positions/roles the league's data supports.
+3. Broad positions (Defender/Midfielder/Forward) and FPL-compatible metrics and role profiles — detailed positions are never inferred.
+4. `import_fpl`: one request to the FPL bootstrap-static endpoint (or a saved file), per-90 conversion, derived save share, labelled as real but unofficial with no published licence. Verified locally: 2026-27 season, 20 clubs, 668 players.
+5. Frontend: clubs grouped by data source (real vs fictional), league-specific roles and thresholds.
+6. djoser + simplejwt accounts and an owner-scoped saved-shortlists API (slug references survive re-imports), DRF throttling.
+7. Frontend sign-in/sign-up, token refresh, Save popover, My shortlists page.
+8. Checks: backend 94 tests, frontend 38 tests, type check, lint, build; manual run with live FPL data and an API smoke test of auth + saved shortlists through the dev proxy.
 
 ### Day 4 — Hardening, documentation and final verification
 
+0. Run migrations and the test suite against MySQL once credentials are available (`docs/database.md`).
 1. Edge cases and bug fixes found while exercising the full journey (empty clubs, players without seasons, all-missing metrics, real-data import path).
 2. Accessibility and responsive pass (keyboard navigation, labels, mobile layout).
 3. Production settings review (secret key, allowed hosts, CORS, debug off), `.env.example` files.
@@ -71,5 +80,5 @@ Carried to Day 4: true 390 px phone-width check (headless Chrome here cannot go 
 
 ## Blockers and limits
 
-- PostgreSQL is not installed locally, so behaviour against PostgreSQL is unverified until a server is available.
-- No licensed real Premier League player-statistics source has been verified; the product runs on fictional demo data until the owner imports licensed data.
+- MySQL 8 is installed locally but its credentials are not available to the agent, so migrations and tests have only run on SQLite. Action: create the database/user per `docs/database.md` and set `DATABASE_URL` in `backend/.env`.
+- The FPL API is unofficial and no published licence was found; it is labelled as such and suitable for personal, non-commercial use only. FPL lists broad positions only.
