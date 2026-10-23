@@ -12,6 +12,11 @@ class Position(models.TextChoices):
     AM = "AM", "Attacking midfielder"
     W = "W", "Winger"
     ST = "ST", "Striker"
+    # Broad groups for sources (such as Fantasy Premier League) that do not record
+    # detailed positions. They are never guessed into the detailed groups above.
+    DF = "DF", "Defender"
+    MF = "MF", "Midfielder"
+    FW = "FW", "Forward"
 
 
 POSITION_ORDER: tuple[str, ...] = tuple(Position.values)

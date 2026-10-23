@@ -27,7 +27,19 @@ from .scoring import (
 
 # Players a club typically uses per position across a league season. Depth counts players
 # who have actually played league minutes, so unused squad members do not hide a need.
-TARGET_DEPTH = {"GK": 1, "CB": 4, "FB": 4, "DM": 2, "CM": 3, "AM": 2, "W": 3, "ST": 3}
+TARGET_DEPTH = {
+    "GK": 1,
+    "CB": 4,
+    "FB": 4,
+    "DM": 2,
+    "CM": 3,
+    "AM": 2,
+    "W": 3,
+    "ST": 3,
+    "DF": 6,
+    "MF": 6,
+    "FW": 3,
+}
 # A role is offered for a league only when this share of its weight has benchmark data.
 ROLE_AVAILABLE_COVERAGE = 0.5
 AGEING_THRESHOLD = 31

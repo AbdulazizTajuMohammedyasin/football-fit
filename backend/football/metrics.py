@@ -125,6 +125,48 @@ METRICS: tuple[Metric, ...] = (
         True,
         "Defensive actions outside the penalty area per 90.",
     ),
+    # Season totals published by Fantasy Premier League, converted to per-90 rates or derived
+    # shares. These differ from the definitions above (e.g. goals include penalties), so they
+    # are kept as separate metrics rather than mixed into the same benchmarks.
+    Metric("goals_p90", "Goals", "per90", True, "Goals per 90, including penalties."),
+    Metric("xg_p90", "Expected goals (xG)", "per90", True, "Expected goals per 90."),
+    Metric("tackles_p90", "Tackles", "per90", True, "Tackles per 90."),
+    Metric(
+        "cbi_p90",
+        "Clearances, blocks & interceptions",
+        "per90",
+        True,
+        "Clearances, blocks and interceptions combined, per 90.",
+    ),
+    Metric("saves_p90", "Saves", "per90", True, "Saves per 90."),
+    Metric(
+        "save_share_pct",
+        "Save share %",
+        "pct",
+        True,
+        "Derived: saves divided by (saves + goals conceded).",
+    ),
+    Metric(
+        "goals_conceded_p90",
+        "Goals conceded",
+        "per90",
+        False,
+        "Team goals conceded while the player was on the pitch, per 90 (lower is better).",
+    ),
+    Metric(
+        "xgc_p90",
+        "Expected goals conceded",
+        "per90",
+        False,
+        "Team expected goals conceded while the player was on the pitch, per 90 (lower is better).",
+    ),
+    Metric(
+        "clean_sheets_p90",
+        "Clean sheets",
+        "per90",
+        True,
+        "Clean sheets per 90 (team result while the player was on the pitch).",
+    ),
 )
 
 METRICS_BY_KEY: dict[str, Metric] = {metric.key: metric for metric in METRICS}

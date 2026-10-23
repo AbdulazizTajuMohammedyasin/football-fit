@@ -223,6 +223,102 @@ ROLES: tuple[RoleProfile, ...] = (
             ("successful_take_ons_p90", 0.10),
         ),
     ),
+    # Profiles for broad positions, built only from metrics Fantasy Premier League publishes.
+    RoleProfile(
+        "gk-results",
+        "GK",
+        "Goalkeeper (results-based)",
+        "Saves a high share of shots faced and keeps goals against low. Goals conceded and "
+        "clean sheets also reflect the defence in front of the goalkeeper.",
+        (
+            ("save_share_pct", 0.45),
+            ("clean_sheets_p90", 0.30),
+            ("goals_conceded_p90", 0.25),
+        ),
+    ),
+    RoleProfile(
+        "df-defensive",
+        "DF",
+        "Defensive defender",
+        "Wins the ball back and blocks danger; the team concedes few chances with them on.",
+        (
+            ("cbi_p90", 0.30),
+            ("tackles_p90", 0.25),
+            ("ball_recoveries_p90", 0.20),
+            ("xgc_p90", 0.25),
+        ),
+    ),
+    RoleProfile(
+        "df-attacking",
+        "DF",
+        "Attacking defender",
+        "Contributes chances and goals from defence while still winning the ball.",
+        (
+            ("xa_p90", 0.35),
+            ("xg_p90", 0.20),
+            ("assists_p90", 0.15),
+            ("ball_recoveries_p90", 0.15),
+            ("tackles_p90", 0.15),
+        ),
+    ),
+    RoleProfile(
+        "mf-ball-winner",
+        "MF",
+        "Ball-winning midfielder",
+        "Regains possession through tackles, recoveries and interceptions.",
+        (
+            ("ball_recoveries_p90", 0.35),
+            ("tackles_p90", 0.35),
+            ("cbi_p90", 0.30),
+        ),
+    ),
+    RoleProfile(
+        "mf-creator",
+        "MF",
+        "Creative midfielder",
+        "Creates high-quality chances for team-mates.",
+        (
+            ("xa_p90", 0.40),
+            ("assists_p90", 0.25),
+            ("xg_p90", 0.20),
+            ("ball_recoveries_p90", 0.15),
+        ),
+    ),
+    RoleProfile(
+        "mf-goal-threat",
+        "MF",
+        "Goal-threat midfielder",
+        "Arrives in scoring positions and finishes chances.",
+        (
+            ("xg_p90", 0.40),
+            ("goals_p90", 0.35),
+            ("xa_p90", 0.25),
+        ),
+    ),
+    RoleProfile(
+        "fw-finisher",
+        "FW",
+        "Finisher",
+        "Gets on the end of chances and scores them.",
+        (
+            ("xg_p90", 0.50),
+            ("goals_p90", 0.35),
+            ("assists_p90", 0.15),
+        ),
+    ),
+    RoleProfile(
+        "fw-all-round",
+        "FW",
+        "All-round forward",
+        "Scores, creates for others and helps win the ball back.",
+        (
+            ("xg_p90", 0.30),
+            ("xa_p90", 0.30),
+            ("assists_p90", 0.15),
+            ("ball_recoveries_p90", 0.15),
+            ("tackles_p90", 0.10),
+        ),
+    ),
 )
 
 ROLES_BY_KEY: dict[str, RoleProfile] = {role.key: role for role in ROLES}
