@@ -138,3 +138,39 @@ def test_shortlist_is_deterministic(league):
     first = shortlist(league, 1, POACHER, ShortlistFilters())
     second = shortlist(league, 1, POACHER, ShortlistFilters())
     assert [r.sample.id for r in first.results] == [r.sample.id for r in second.results]
+
+
+def test_early_season_league_still_has_benchmarks_and_shortlists():
+    league = LeagueContext(
+        samples=[
+            striker(1, club_id=1, quality=0.3, minutes=600),
+            striker(2, club_id=2, quality=0.5, minutes=630),
+            striker(3, club_id=3, quality=0.4, minutes=150),
+        ]
+    )
+    assert league.min_minutes == 189
+    assert league.benchmarks["ST"]["np_goals_p90"] == [0.3, 0.5]
+    result = shortlist(league, club_id=1, role=POACHER, filters=ShortlistFilters())
+    assert [r.sample.id for r in result.results] == [2]  # player 3 is below the threshold
+
+
+def test_depth_counts_only_players_who_have_played():
+    league = LeagueContext(
+        samples=[
+            striker(1, club_id=1, quality=0.3),
+            striker(2, club_id=1, quality=0.3, minutes=0),
+            striker(3, club_id=1, quality=0.3, minutes=None),
+        ]
+    )
+    need = position_need(league, club_id=1, position="ST")
+    assert need.squad_count == 1
+    assert any("2 more listed without league minutes" in line for line in need.evidence)
+
+
+def test_only_positions_and_roles_supported_by_the_data_are_offered():
+    league = LeagueContext(samples=[striker(1, club_id=1, quality=0.3)])
+    assert league.positions == ["ST"]
+    # The striker metrics cover the poacher profile fully but the complete-forward
+    # profile only partly (no xA, key passes, aerials, recoveries or take-ons).
+    assert [role.key for role in league.available_roles("ST")] == ["st-poacher"]
+    assert [need.position for need in club_needs(league, club_id=1)] == ["ST"]

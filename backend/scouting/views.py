@@ -24,8 +24,10 @@ from .data import league_for_club, league_for_player
 from .roles import ROLES, ROLES_BY_KEY, roles_for
 from .scoring import (
     BENCHMARK_MIN_MINUTES,
+    BENCHMARK_SHARE_OF_MAX,
     FIT_WEIGHTS,
     FULL_RELIABILITY_MINUTES,
+    RELIABILITY_SHARE_OF_MAX,
     RELIABLE_COVERAGE,
     percentile_rank,
     score_role,
@@ -56,8 +58,10 @@ def meta(request):
             "roles": [s.role_data(role) for role in ROLES],
             "scoring": {
                 "benchmark_min_minutes": BENCHMARK_MIN_MINUTES,
+                "benchmark_share_of_max": BENCHMARK_SHARE_OF_MAX,
                 "reliable_coverage": RELIABLE_COVERAGE,
                 "full_reliability_minutes": FULL_RELIABILITY_MINUTES,
+                "reliability_share_of_max": RELIABILITY_SHARE_OF_MAX,
                 "fit_weights": FIT_WEIGHTS,
                 "need_weights": NEED_WEIGHTS,
                 "ageing_threshold": AGEING_THRESHOLD,
@@ -130,7 +134,7 @@ def club_recommendations(request, slug):
     filters = ShortlistFilters(
         max_age=params.get("max_age"),
         min_age=params.get("min_age"),
-        min_minutes=params.get("min_minutes", BENCHMARK_MIN_MINUTES),
+        min_minutes=params.get("min_minutes"),
         include_low_coverage=params["include_low_coverage"],
         include_secondary=params["include_secondary"],
         limit=params["limit"],
@@ -144,7 +148,9 @@ def club_recommendations(request, slug):
             "filters": {
                 "max_age": filters.max_age,
                 "min_age": filters.min_age,
-                "min_minutes": filters.min_minutes,
+                "min_minutes": league.context.min_minutes
+                if filters.min_minutes is None
+                else filters.min_minutes,
                 "include_low_coverage": filters.include_low_coverage,
                 "include_secondary": filters.include_secondary,
                 "limit": filters.limit,
@@ -202,7 +208,8 @@ def player_detail(request, slug):
 
     season = league.seasons[player.id]
     benchmarks = league.context.benchmarks[player.position]
-    role_keys = {key for role in roles_for(player.position) for key, _ in role.weights}
+    roles = league.context.available_roles(player.position) or list(roles_for(player.position))
+    role_keys = {key for role in roles for key, _ in role.weights}
     relevant = [key for key in METRICS_BY_KEY if key in benchmarks or key in role_keys]
     metrics = []
     for key in relevant:
@@ -225,8 +232,7 @@ def player_detail(request, slug):
         )
 
     role_scores = [
-        s.role_score_data(score_role(season.metrics, role, benchmarks))
-        for role in roles_for(player.position)
+        s.role_score_data(score_role(season.metrics, role, benchmarks)) for role in roles
     ]
     available = sum(1 for m in metrics if not m["missing"])
     return Response(
@@ -234,7 +240,7 @@ def player_detail(request, slug):
             "player": s.player_summary(player, league),
             **s.league_meta(league),
             "data_coverage": round(available / len(metrics), 3) if metrics else 0,
-            "below_benchmark_minutes": (season.minutes or 0) < BENCHMARK_MIN_MINUTES,
+            "below_benchmark_minutes": (season.minutes or 0) < league.context.min_minutes,
             "metrics": metrics,
             "role_scores": role_scores,
         }
@@ -260,7 +266,11 @@ def compare(request):
         return Response(
             {"detail": "No season statistics are available."}, status=status.HTTP_404_NOT_FOUND
         )
-    role = ROLES_BY_KEY[params["role"]] if params.get("role") else roles_for(players[0].position)[0]
+    if params.get("role"):
+        role = ROLES_BY_KEY[params["role"]]
+    else:
+        defaults = league.context.available_roles(players[0].position)
+        role = defaults[0] if defaults else roles_for(players[0].position)[0]
     benchmarks = league.context.benchmarks[role.position]
 
     entries = []
@@ -279,7 +289,11 @@ def compare(request):
         {
             **s.league_meta(league),
             "role": s.role_data(role),
-            "available_roles": [s.role_data(r) for r in ROLES],
+            "available_roles": [
+                s.role_data(r)
+                for position in league.context.positions
+                for r in league.context.available_roles(position)
+            ],
             "players": entries,
         }
     )

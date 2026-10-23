@@ -119,11 +119,20 @@ def player_summary(player: Player, league: League | None) -> dict:
 
 
 def league_meta(league: League) -> dict:
+    context = league.context
     return {
         "source": source_data(league.source),
         "competition": league.competition,
         "season": league.season,
         "as_of": league.as_of.isoformat(),
+        "thresholds": {
+            "benchmark_min_minutes": context.min_minutes,
+            "full_reliability_minutes": context.thresholds.full_reliability,
+        },
+        "positions": context.positions,
+        "available_roles": [
+            role.key for position in context.positions for role in context.available_roles(position)
+        ],
     }
 
 

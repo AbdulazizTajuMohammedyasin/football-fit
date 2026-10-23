@@ -20,6 +20,10 @@ BENCHMARK_MIN_MINUTES = 900
 RELIABLE_COVERAGE = 0.7
 # Minutes at which the reliability component reaches 100.
 FULL_RELIABILITY_MINUTES = 2500
+# Early in a season nobody has 900 minutes yet, so both thresholds are capped at these
+# shares of the most league minutes any player has played so far.
+BENCHMARK_SHARE_OF_MAX = 0.3
+RELIABILITY_SHARE_OF_MAX = 0.75
 
 FIT_WEIGHTS = {"role_quality": 0.60, "upgrade": 0.25, "reliability": 0.15}
 
@@ -68,11 +72,29 @@ class RoleScore:
 Benchmarks = dict[str, list[float]]
 
 
-def build_benchmarks(pool: Iterable[PlayerSample], position: str) -> Benchmarks:
-    """Sorted metric values for players in `position` with enough minutes."""
+@dataclass(frozen=True)
+class MinuteThresholds:
+    benchmark: int
+    full_reliability: int
+
+
+def minute_thresholds(max_minutes: int) -> MinuteThresholds:
+    """League-relative minute thresholds, so a part-played season still has a benchmark pool."""
+    return MinuteThresholds(
+        benchmark=min(BENCHMARK_MIN_MINUTES, round(max_minutes * BENCHMARK_SHARE_OF_MAX)),
+        full_reliability=max(
+            1, min(FULL_RELIABILITY_MINUTES, round(max_minutes * RELIABILITY_SHARE_OF_MAX))
+        ),
+    )
+
+
+def build_benchmarks(
+    pool: Iterable[PlayerSample], position: str, min_minutes: int = BENCHMARK_MIN_MINUTES
+) -> Benchmarks:
+    """Sorted metric values for players in `position` with at least `min_minutes`."""
     values: dict[str, list[float]] = {}
     for sample in pool:
-        if sample.position != position or (sample.minutes or 0) < BENCHMARK_MIN_MINUTES:
+        if sample.position != position or (sample.minutes or 0) < min_minutes:
             continue
         for key, value in sample.metrics.items():
             values.setdefault(key, []).append(value)
@@ -132,10 +154,10 @@ def best_position_score(
     return max(usable, key=lambda s: (s.score, s.coverage))
 
 
-def reliability(minutes: int | None) -> float | None:
+def reliability(minutes: int | None, full_minutes: int = FULL_RELIABILITY_MINUTES) -> float | None:
     if minutes is None:
         return None
-    return round(min(minutes / FULL_RELIABILITY_MINUTES, 1.0) * 100, 1)
+    return round(min(minutes / full_minutes, 1.0) * 100, 1)
 
 
 @dataclass
@@ -157,6 +179,7 @@ def fit_score(
     role_score: RoleScore,
     candidate_minutes: int | None,
     incumbent_best: float | None,
+    full_minutes: int = FULL_RELIABILITY_MINUTES,
 ) -> FitScore:
     """Blend role quality, upgrade over the club's best incumbent, and minutes reliability.
 
@@ -194,12 +217,11 @@ def fit_score(
         FitComponent("upgrade", "Upgrade on squad", FIT_WEIGHTS["upgrade"], upgrade, upgrade_text)
     )
 
-    rel = reliability(candidate_minutes)
+    rel = reliability(candidate_minutes, full_minutes)
     rel_text = (
         "Minutes not recorded."
         if rel is None
-        else f"{candidate_minutes} league minutes; {FULL_RELIABILITY_MINUTES}+ counts as fully "
-        "established."
+        else f"{candidate_minutes} league minutes; {full_minutes}+ counts as fully established."
     )
     components.append(
         FitComponent("reliability", "Sample reliability", FIT_WEIGHTS["reliability"], rel, rel_text)

@@ -12,20 +12,24 @@ from football.positions import POSITION_ORDER, Position
 
 from .roles import RoleProfile, roles_for
 from .scoring import (
-    BENCHMARK_MIN_MINUTES,
     RELIABLE_COVERAGE,
     Benchmarks,
     FitScore,
+    MinuteThresholds,
     PlayerSample,
     RoleScore,
     best_position_score,
     build_benchmarks,
     fit_score,
+    minute_thresholds,
     score_role,
 )
 
-# Squad depth a club typically carries per position across a league season.
-TARGET_DEPTH = {"GK": 2, "CB": 4, "FB": 4, "DM": 2, "CM": 3, "AM": 2, "W": 3, "ST": 3}
+# Players a club typically uses per position across a league season. Depth counts players
+# who have actually played league minutes, so unused squad members do not hide a need.
+TARGET_DEPTH = {"GK": 1, "CB": 4, "FB": 4, "DM": 2, "CM": 3, "AM": 2, "W": 3, "ST": 3}
+# A role is offered for a league only when this share of its weight has benchmark data.
+ROLE_AVAILABLE_COVERAGE = 0.5
 AGEING_THRESHOLD = 31
 NEED_WEIGHTS = {"quality_gap": 0.45, "depth_gap": 0.35, "ageing": 0.20}
 NEED_LEVELS = ((60.0, "high"), (35.0, "medium"), (0.0, "low"))
@@ -36,8 +40,34 @@ class LeagueContext:
     samples: list[PlayerSample]
 
     @cached_property
+    def thresholds(self) -> MinuteThresholds:
+        return minute_thresholds(max((s.minutes or 0 for s in self.samples), default=0))
+
+    @property
+    def min_minutes(self) -> int:
+        return self.thresholds.benchmark
+
+    @cached_property
+    def positions(self) -> list[str]:
+        """Positions used by this league's data, in display order."""
+        present = {s.position for s in self.samples}
+        return [pos for pos in POSITION_ORDER if pos in present]
+
+    @cached_property
     def benchmarks(self) -> dict[str, Benchmarks]:
-        return {pos: build_benchmarks(self.samples, pos) for pos in POSITION_ORDER}
+        return {
+            pos: build_benchmarks(self.samples, pos, self.min_minutes) for pos in POSITION_ORDER
+        }
+
+    def available_roles(self, position: str) -> list[RoleProfile]:
+        """Role profiles for `position` that this league's metrics can actually support."""
+        benchmarks = self.benchmarks[position]
+        return [
+            role
+            for role in roles_for(position)
+            if sum(w for key, w in role.weights if key in benchmarks)
+            >= ROLE_AVAILABLE_COVERAGE * role.total_weight
+        ]
 
     @cached_property
     def club_ids(self) -> list[int]:
@@ -54,7 +84,7 @@ class LeagueContext:
         scores = [
             result.score
             for s in self.by_club(club_id)
-            if s.position == position and (s.minutes or 0) >= BENCHMARK_MIN_MINUTES
+            if s.position == position and (s.minutes or 0) >= self.min_minutes
             if (result := self.best_score(s)) is not None
         ]
         return max(scores) if scores else None
@@ -63,7 +93,7 @@ class LeagueContext:
         scores = [
             result.score
             for s in self.by_club(club_id)
-            if s.position == role.position and (s.minutes or 0) >= BENCHMARK_MIN_MINUTES
+            if s.position == role.position and (s.minutes or 0) >= self.min_minutes
             if (result := score_role(s.metrics, role, self.benchmarks[role.position])).score
             is not None
             and result.coverage >= 0.5
@@ -110,21 +140,26 @@ def _ordinal(n: int) -> str:
 
 def position_need(context: LeagueContext, club_id: int, position: str) -> PositionNeed:
     label = Position(position).label
-    squad = [s for s in context.by_club(club_id) if s.position == position]
+    club = context.by_club(club_id)
+    squad = [s for s in club if s.position == position]
+    played = [s for s in squad if (s.minutes or 0) > 0]
     cover = [
         s
-        for s in context.by_club(club_id)
-        if s.position != position and position in s.secondary_positions
+        for s in club
+        if s.position != position and position in s.secondary_positions and (s.minutes or 0) > 0
     ]
     target = TARGET_DEPTH[position]
     evidence: list[str] = []
 
-    # Depth: recognised players count fully, players who can cover count half.
-    effective = len(squad) + 0.5 * len(cover)
+    # Depth: players who have played count fully, players who can cover count half.
+    effective = len(played) + 0.5 * len(cover)
     depth_gap = round(min(max((target - effective) / target, 0.0), 1.0) * 100, 1)
     cover_text = f" plus {len(cover)} who can cover" if cover else ""
+    unused = len(squad) - len(played)
+    unused_text = f" ({unused} more listed without league minutes)" if unused else ""
     evidence.append(
-        f"{len(squad)} recognised {label.lower()}(s){cover_text}; typical depth is {target}."
+        f"{len(played)} {label.lower()}(s) have played league minutes{unused_text}{cover_text}; "
+        f"clubs typically use {target}."
     )
 
     # Ageing: share of the position's minutes played by players aged 31+.
@@ -160,7 +195,7 @@ def position_need(context: LeagueContext, club_id: int, position: str) -> Positi
     if club_best is None:
         quality_gap = 100.0
         evidence.append(
-            f"No {label.lower()} with {BENCHMARK_MIN_MINUTES}+ minutes and enough data to score."
+            f"No {label.lower()} with {context.min_minutes}+ minutes and enough data to score."
         )
     else:
         rank = ranked.index(club_best) + 1
@@ -186,19 +221,19 @@ def position_need(context: LeagueContext, club_id: int, position: str) -> Positi
         level=_need_level(score),
         components=components,
         evidence=evidence,
-        squad_count=len(squad),
+        squad_count=len(played),
         cover_count=len(cover),
         target_depth=target,
         best_score=club_best,
         league_rank=rank,
         clubs_ranked=len(ranked),
         ageing_share=ageing,
-        roles=[role.key for role in roles_for(position)],
+        roles=[role.key for role in context.available_roles(position)],
     )
 
 
 def club_needs(context: LeagueContext, club_id: int) -> list[PositionNeed]:
-    needs = [position_need(context, club_id, position) for position in POSITION_ORDER]
+    needs = [position_need(context, club_id, position) for position in context.positions]
     return sorted(
         needs,
         key=lambda n: (-(n.score if n.score is not None else -1), POSITION_ORDER.index(n.position)),
@@ -209,7 +244,8 @@ def club_needs(context: LeagueContext, club_id: int) -> list[PositionNeed]:
 class ShortlistFilters:
     max_age: int | None = None
     min_age: int | None = None
-    min_minutes: int = BENCHMARK_MIN_MINUTES
+    # None means the league's benchmark threshold.
+    min_minutes: int | None = None
     include_low_coverage: bool = False
     include_secondary: bool = False
     limit: int = 20
@@ -241,6 +277,7 @@ def shortlist(
 ) -> Shortlist:
     benchmarks = context.benchmarks[role.position]
     incumbent = context.club_best_in_role(club_id, role)
+    min_minutes = context.min_minutes if filters.min_minutes is None else filters.min_minutes
     results: list[Recommendation] = []
     considered = excluded_low_coverage = 0
 
@@ -252,7 +289,7 @@ def shortlist(
             filters.include_secondary and role.position in s.secondary_positions
         ):
             continue
-        if (s.minutes or 0) < filters.min_minutes:
+        if (s.minutes or 0) < min_minutes:
             continue
         if filters.max_age is not None and (s.age is None or s.age > filters.max_age):
             continue
@@ -271,7 +308,9 @@ def shortlist(
             Recommendation(
                 sample=s,
                 role_score=role_result,
-                fit=fit_score(role_result, s.minutes, incumbent),
+                fit=fit_score(
+                    role_result, s.minutes, incumbent, context.thresholds.full_reliability
+                ),
                 plays_secondary=plays_secondary,
             )
         )

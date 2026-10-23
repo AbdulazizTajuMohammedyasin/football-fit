@@ -143,3 +143,13 @@ def test_fit_score_without_incumbent_treats_slot_as_empty():
 def test_fit_score_is_none_without_role_score():
     role_score = score_role({}, ROLES_BY_KEY["st-poacher"], {})
     assert fit_score(role_score, candidate_minutes=3000, incumbent_best=50).score is None
+
+
+def test_minute_thresholds_scale_down_early_in_a_season():
+    from scouting.scoring import minute_thresholds
+
+    full_season = minute_thresholds(3420)
+    assert (full_season.benchmark, full_season.full_reliability) == (900, 2500)
+    early = minute_thresholds(630)
+    assert (early.benchmark, early.full_reliability) == (189, 472)
+    assert minute_thresholds(0).full_reliability == 1
