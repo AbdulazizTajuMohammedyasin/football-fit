@@ -152,8 +152,15 @@ def _unique_slug(model, base: str, taken: set[str]) -> str:
 @transaction.atomic
 def import_csv(path: Path, info: SourceInfo, default_competition: str) -> ImportResult:
     """Validate and import a CSV, replacing any data previously imported under `info.slug`."""
-    rows = read_rows(path, default_competition)
+    return write_rows(read_rows(path, default_competition), info)
 
+
+@transaction.atomic
+def write_rows(rows: list[dict], info: SourceInfo) -> ImportResult:
+    """Replace the data source `info.slug` with already-validated rows.
+
+    Each row holds the keys produced by `_parse_row`, plus an optional `club_short_name`.
+    """
     DataSource.objects.filter(slug=info.slug).delete()
     source = DataSource.objects.create(
         slug=info.slug,
@@ -177,6 +184,7 @@ def import_csv(path: Path, info: SourceInfo, default_competition: str) -> Import
                 source=source,
                 slug=_unique_slug(Club, slugify(row["club"]), taken_slugs),
                 name=row["club"],
+                short_name=row.get("club_short_name", ""),
                 competition=row["competition"],
             )
             clubs[row["club"]] = club
