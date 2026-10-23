@@ -3,12 +3,15 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, Link, RouterProvider } from 'react-router'
 
+import { AuthProvider } from '@/auth/AuthProvider'
 import { Layout } from '@/components/Layout'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { ClubPage } from '@/pages/ClubPage'
+import { AuthPage } from '@/pages/AuthPage'
 import { ComparePage } from '@/pages/ComparePage'
 import { HomePage } from '@/pages/HomePage'
 import { MethodologyPage } from '@/pages/MethodologyPage'
+import { MyShortlistsPage } from '@/pages/MyShortlistsPage'
 import { PlayerPage } from '@/pages/PlayerPage'
 import { ShortlistPage } from '@/pages/ShortlistPage'
 
@@ -41,6 +44,9 @@ const router = createBrowserRouter([
       { path: 'players/:slug', element: <PlayerPage /> },
       { path: 'compare', element: <ComparePage /> },
       { path: 'methodology', element: <MethodologyPage /> },
+      { path: 'signin', element: <AuthPage mode="signin" /> },
+      { path: 'signup', element: <AuthPage mode="signup" /> },
+      { path: 'shortlists', element: <MyShortlistsPage /> },
       { path: '*', element: <NotFound /> },
     ],
   },
@@ -49,9 +55,11 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <RouterProvider router={router} />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <RouterProvider router={router} />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </StrictMode>,
 )

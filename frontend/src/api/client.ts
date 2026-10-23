@@ -33,11 +33,28 @@ export function buildQuery(params: QueryParams): string {
   return text ? `?${text}` : ''
 }
 
-export async function apiGet<T>(path: string, params: QueryParams = {}, signal?: AbortSignal): Promise<T> {
+export interface RequestOptions {
+  params?: QueryParams
+  body?: unknown
+  token?: string | null
+  signal?: AbortSignal
+}
+
+export async function apiRequest<T>(
+  method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
+  path: string,
+  { params = {}, body, token, signal }: RequestOptions = {},
+): Promise<T> {
+  const headers: Record<string, string> = { Accept: 'application/json' }
+  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  if (token) headers.Authorization = `Bearer ${token}`
+
   let response: Response
   try {
     response = await fetch(`${API_BASE}/api${path}${buildQuery(params)}`, {
-      headers: { Accept: 'application/json' },
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
       signal,
     })
   } catch (error) {
@@ -54,5 +71,10 @@ export async function apiGet<T>(path: string, params: QueryParams = {}, signal?:
     }
     throw new ApiError(response.status, message ?? `Request failed (${response.status})`)
   }
+  if (response.status === 204) return undefined as T
   return (await response.json()) as T
+}
+
+export function apiGet<T>(path: string, params: QueryParams = {}, signal?: AbortSignal): Promise<T> {
+  return apiRequest<T>('GET', path, { params, signal })
 }

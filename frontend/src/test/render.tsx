@@ -4,13 +4,17 @@ import type { ReactElement } from 'react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { vi } from 'vitest'
 
+import { AuthProvider } from '@/auth/AuthProvider'
+
 /** Render a page inside a fresh query client and memory router. */
 export function renderRoute(path: string, routePath: string, element: ReactElement) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const router = createMemoryRouter([{ path: routePath, element }], { initialEntries: [path] })
   return render(
     <QueryClientProvider client={client}>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </QueryClientProvider>,
   )
 }

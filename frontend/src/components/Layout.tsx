@@ -1,7 +1,8 @@
 import { FlaskConical } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router'
+import { NavLink, Outlet, useNavigate } from 'react-router'
 
 import { useMeta } from '@/api/queries'
+import { useAuth } from '@/auth/AuthProvider'
 import { formatDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -36,6 +37,45 @@ function DataNotice() {
   )
 }
 
+const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+  cn('rounded-md px-3 py-1.5 transition-colors hover:bg-white/10', isActive && 'bg-white/15 font-medium')
+
+function AccountNav() {
+  const { user, checking, signOut } = useAuth()
+  const navigate = useNavigate()
+  if (checking) return null
+  if (!user) {
+    return (
+      <li>
+        <NavLink to="/signin" className={navLinkClass}>
+          Sign in
+        </NavLink>
+      </li>
+    )
+  }
+  return (
+    <>
+      <li>
+        <NavLink to="/shortlists" className={navLinkClass}>
+          My shortlists
+        </NavLink>
+      </li>
+      <li>
+        <button
+          type="button"
+          className="rounded-md px-3 py-1.5 transition-colors hover:bg-white/10"
+          onClick={() => {
+            signOut()
+            navigate('/')
+          }}
+        >
+          Sign out
+        </button>
+      </li>
+    </>
+  )
+}
+
 export function Layout() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -54,23 +94,15 @@ export function Layout() {
             Football Fit
           </NavLink>
           <nav aria-label="Main">
-            <ul className="flex gap-1 text-sm">
+            <ul className="flex flex-wrap gap-1 text-sm">
               {NAV.map((item) => (
                 <li key={item.to}>
-                  <NavLink
-                    to={item.to}
-                    end={item.end}
-                    className={({ isActive }) =>
-                      cn(
-                        'rounded-md px-3 py-1.5 transition-colors hover:bg-white/10',
-                        isActive && 'bg-white/15 font-medium',
-                      )
-                    }
-                  >
+                  <NavLink to={item.to} end={item.end} className={navLinkClass}>
                     {item.label}
                   </NavLink>
                 </li>
               ))}
+              <AccountNav />
             </ul>
           </nav>
         </div>

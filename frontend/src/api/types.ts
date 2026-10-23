@@ -226,3 +226,24 @@ export interface Comparison extends LeagueMeta {
   role: Role
   players: CompareEntry[]
 }
+
+export interface SavedPlayerRef {
+  slug: string
+  available: boolean
+  name?: string
+  position?: string
+  club?: string | null
+  is_demo?: boolean
+}
+
+export interface SavedShortlist {
+  id: number
+  name: string
+  club_slug: string
+  club_name: string | null
+  role_key: string
+  role_name: string | null
+  entries: { player: SavedPlayerRef; note: string; added_at: string }[]
+  created_at: string
+  updated_at: string
+}

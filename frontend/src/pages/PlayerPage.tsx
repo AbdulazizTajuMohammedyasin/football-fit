@@ -5,6 +5,7 @@ import { useMeta, usePlayer } from '@/api/queries'
 import type { RoleScore } from '@/api/types'
 import { MetricRow } from '@/components/MetricRow'
 import { CoverageBadge, ScoreBar } from '@/components/score'
+import { SaveToShortlist } from '@/components/SaveToShortlist'
 import { SourceLine } from '@/components/SourceLine'
 import { EmptyState, ErrorState, LoadingState } from '@/components/states'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -93,11 +94,14 @@ export function PlayerPage() {
             </div>
           ))}
         </dl>
-        <Button asChild variant="outline" size="sm">
-          <Link to={`/compare?players=${info.slug}`}>
-            <GitCompareArrows aria-hidden /> Compare with other players
-          </Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to={`/compare?players=${info.slug}`}>
+              <GitCompareArrows aria-hidden /> Compare with other players
+            </Link>
+          </Button>
+          <SaveToShortlist playerSlug={info.slug} playerName={info.name} />
+        </div>
       </header>
 
       {data.season === null ? (

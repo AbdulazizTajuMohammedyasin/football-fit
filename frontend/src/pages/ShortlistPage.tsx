@@ -6,6 +6,7 @@ import { useClub, useMeta, useShortlist, type ShortlistParams } from '@/api/quer
 import type { MetricDefinition, Recommendation, Shortlist } from '@/api/types'
 import { MetricRow } from '@/components/MetricRow'
 import { RoleSelect } from '@/components/RoleSelect'
+import { SaveToShortlist } from '@/components/SaveToShortlist'
 import { CoverageBadge, ScoreBar } from '@/components/score'
 import { SourceLine } from '@/components/SourceLine'
 import { EmptyState, ErrorState, LoadingState } from '@/components/states'
@@ -41,10 +42,14 @@ function ResultCard({
   selected,
   selectionFull,
   onToggle,
+  clubSlug,
+  roleKey,
 }: {
   rank: number
   rec: Recommendation
   metrics: Map<string, MetricDefinition>
+  clubSlug: string
+  roleKey: string
   selected: boolean
   selectionFull: boolean
   onToggle: () => void
@@ -88,6 +93,7 @@ function ResultCard({
               Compare
             </Label>
           </div>
+          <SaveToShortlist playerSlug={player.slug} playerName={player.name} clubSlug={clubSlug} roleKey={roleKey} />
         </div>
       </div>
 
@@ -400,6 +406,8 @@ export function ShortlistPage() {
                       rank={index + 1}
                       rec={rec}
                       metrics={metrics}
+                      clubSlug={slug}
+                      roleKey={role.key}
                       selected={selected.includes(rec.player.slug)}
                       selectionFull={selected.length >= MAX_COMPARE}
                       onToggle={() => toggle(rec.player.slug)}
