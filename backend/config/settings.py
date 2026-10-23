@@ -6,6 +6,7 @@ SQLite file is used so the project can run without a database server.
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 import dj_database_url
@@ -38,8 +39,11 @@ def env_list(name: str, default: str = "") -> list[str]:
 
 DEBUG = env_bool("DJANGO_DEBUG", default=False)
 # A placeholder key keeps local tooling and tests working; production must set one.
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") or "insecure-local-only-key"
-if os.environ.get("DJANGO_ENV") == "production" and SECRET_KEY == "insecure-local-only-key":
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") or "insecure-local-only-key-set-DJANGO_SECRET_KEY"
+if (
+    os.environ.get("DJANGO_ENV") == "production"
+    and SECRET_KEY == "insecure-local-only-key-set-DJANGO_SECRET_KEY"
+):
     raise RuntimeError("DJANGO_SECRET_KEY must be set in production")
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
@@ -52,9 +56,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "djoser",
     "corsheaders",
     "football",
     "scouting",
+    "shortlists",
 ]
 
 MIDDLEWARE = [
@@ -125,9 +131,32 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"]
     + (["rest_framework.renderers.BrowsableAPIRenderer"] if DEBUG else []),
+    # Scouting endpoints are public; account endpoints opt in to IsAuthenticated.
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
-    "UNAUTHENTICATED_USER": None,
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": os.environ.get("API_ANON_RATE", "120/min"),
+        "user": os.environ.get("API_USER_RATE", "600/min"),
+    },
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+DJOSER = {
+    "USER_CREATE_PASSWORD_RETYPE": False,
+    "SEND_ACTIVATION_EMAIL": False,
+    "HIDE_USERS": True,
 }
 
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173")
-CORS_ALLOW_METHODS = ["GET", "OPTIONS"]
+CORS_ALLOW_METHODS = ["GET", "POST", "PATCH", "DELETE", "OPTIONS"]
