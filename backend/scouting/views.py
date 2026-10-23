@@ -1,4 +1,6 @@
-from django.db.models import Count, Q
+from itertools import islice
+
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -158,12 +160,15 @@ def player_list(request):
     players = Player.objects.select_related("club", "source").order_by("name")
     if params.get("search"):
         players = players.filter(name__icontains=params["search"].strip())
-    if params.get("position"):
-        players = players.filter(
-            Q(position=params["position"]) | Q(secondary_positions__icontains=params["position"])
-        )
     if params.get("club"):
         players = players.filter(club__slug=params["club"])
+    if params.get("position"):
+        # Secondary positions live in a JSON list; JSON lookups differ between MySQL and
+        # SQLite, so match them in Python to behave identically on both.
+        position = params["position"]
+        players = (
+            p for p in players if p.position == position or position in p.secondary_positions
+        )
     return Response(
         [
             {
@@ -174,7 +179,7 @@ def player_list(request):
                 "club": s.club_summary(p.club) if p.club else None,
                 "is_demo": p.source.is_demo,
             }
-            for p in players[: params["limit"]]
+            for p in islice(players, params["limit"])
         ]
     )
 

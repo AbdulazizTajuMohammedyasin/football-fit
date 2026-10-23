@@ -3,14 +3,14 @@
 ## Audit (starting point)
 
 - Repository contained only the project rules file; no commits, no code.
-- Tooling available locally: Node 24 / npm 11, Python 3.13. **No PostgreSQL server or Docker** is installed on the development machine.
+- Tooling available locally: Node 24 / npm 11, Python 3.13, MySQL 8.0 server (credentials not available to the agent). No Docker.
 
 ## Key decisions
 
 | Decision | Reason |
 | --- | --- |
 | Monorepo: `backend/` (Django + DRF) and `frontend/` (React + TS + Vite + shadcn/ui + TanStack Query) | Preferred stack; modular monolith. |
-| Database configured through `DATABASE_URL`; PostgreSQL is the target (`docker-compose.yml` to be provided). SQLite is used only when `DATABASE_URL` is unset (local dev/tests). | PostgreSQL is not installed locally, so tests cannot run against it here. Models avoid DB-specific features so both work. |
+| Database configured through `DATABASE_URL`; **MySQL 8** is the target (changed from PostgreSQL at the owner's request on 2026-10-24; see `docs/database.md`). SQLite is used only when `DATABASE_URL` is unset (local dev/tests). | Owner decision. Models and queries avoid DB-specific features (e.g. JSON lookups) so MySQL and SQLite behave the same. |
 | Ship a **fictional, clearly labelled demo dataset** (fictional clubs and players, deterministically generated metrics). | No verified free, licensed source for Premier League player statistics: football-data.org's free tier excludes squads and player stats (checked 2026-10-22); FBref/Opta-derived data has scraping restrictions. Inventing real-looking stats for real players is forbidden. |
 | CSV import command with provenance (source name, licence note, season, as-of date). | Lets the owner load properly licensed real data later without code changes. |
 | Metrics stored in a validated JSON field keyed by a metric catalogue; missing metrics are absent, never zero. | Supports role-specific profiles and explicit coverage. |

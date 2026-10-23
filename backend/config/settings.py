@@ -1,7 +1,7 @@
 """Django settings for Football Fit.
 
 Configuration comes from environment variables (see `.env.example`).
-PostgreSQL is the target database via DATABASE_URL; when it is unset a local
+MySQL is the target database via DATABASE_URL; when it is unset a local
 SQLite file is used so the project can run without a database server.
 """
 
@@ -93,6 +93,17 @@ DATABASES = {
         conn_max_age=60,
     )
 }
+if DATABASES["default"]["ENGINE"] == "django.db.backends.mysql":
+    DATABASES["default"].setdefault("OPTIONS", {}).update(
+        {
+            # utf8mb4 stores every player name correctly (accents, non-Latin scripts).
+            "charset": "utf8mb4",
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+        }
+    )
+    DATABASES["default"].setdefault("TEST", {}).update(
+        {"CHARSET": "utf8mb4", "COLLATION": "utf8mb4_unicode_ci"}
+    )
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

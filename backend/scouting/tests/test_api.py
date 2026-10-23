@@ -133,3 +133,12 @@ def test_compare_validation(client, demo):
     one = Player.objects.first().slug
     assert client.get(f"/api/compare/?players={one}").status_code == 400
     assert client.get(f"/api/compare/?players={one},missing-player").status_code == 404
+
+
+def test_player_position_filter_includes_secondary_positions(client, demo):
+    data = client.get("/api/players/?position=AM&limit=100").json()
+    assert data
+    slugs = [p["slug"] for p in data]
+    players = Player.objects.filter(slug__in=slugs)
+    assert all(p.position == "AM" or "AM" in p.secondary_positions for p in players)
+    assert any(p.position != "AM" for p in players)
