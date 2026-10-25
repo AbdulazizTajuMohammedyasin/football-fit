@@ -14,6 +14,7 @@ from football.positions import POSITION_ORDER, Position
 from . import serializers as s
 from .analysis import (
     AGEING_THRESHOLD,
+    NEED_LEVELS,
     NEED_WEIGHTS,
     TARGET_DEPTH,
     ShortlistFilters,
@@ -64,6 +65,7 @@ def meta(request):
                 "reliability_share_of_max": RELIABILITY_SHARE_OF_MAX,
                 "fit_weights": FIT_WEIGHTS,
                 "need_weights": NEED_WEIGHTS,
+                "need_levels": {level: threshold for threshold, level in NEED_LEVELS},
                 "ageing_threshold": AGEING_THRESHOLD,
             },
         }

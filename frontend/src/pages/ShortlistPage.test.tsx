@@ -37,6 +37,7 @@ const meta = {
     reliability_share_of_max: 0.75,
     fit_weights: {},
     need_weights: {},
+    need_levels: { high: 60, medium: 35, low: 0 },
     ageing_threshold: 31,
   },
 }

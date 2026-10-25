@@ -118,8 +118,8 @@ export function MethodologyPage() {
       <Section id="needs" title="Club needs">
         <p>
           Each position gets a need score from 0 (no need) to 100 (urgent), blended from the components below.
-          “Older players” means aged {scoring.ageing_threshold} or more on the data date. Scores of 60+ are
-          shown as a high need and 35+ as a medium need.
+          “Older players” means aged {scoring.ageing_threshold} or more on the data date. Scores of{' '}
+          {scoring.need_levels.high}+ are shown as a high need and {scoring.need_levels.medium}+ as a medium need.
         </p>
         <WeightList weights={scoring.need_weights} labels={NEED_LABELS} />
         <ul className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">

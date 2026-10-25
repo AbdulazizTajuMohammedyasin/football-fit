@@ -77,6 +77,7 @@ export interface Meta {
     reliability_share_of_max: number
     fit_weights: Record<string, number>
     need_weights: Record<string, number>
+    need_levels: { high: number; medium: number; low: number }
     ageing_threshold: number
   }
 }

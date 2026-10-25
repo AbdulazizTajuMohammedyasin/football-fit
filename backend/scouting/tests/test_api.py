@@ -25,6 +25,7 @@ def test_meta_lists_sources_roles_and_scoring_constants(client, demo):
     assert data["sources"][0]["is_demo"] is True
     assert {r["position"] for r in data["roles"]} == {p["code"] for p in data["positions"]}
     assert set(data["scoring"]["fit_weights"]) == {"role_quality", "upgrade", "reliability"}
+    assert data["scoring"]["need_levels"] == {"high": 60.0, "medium": 35.0, "low": 0.0}
 
 
 def test_club_list(client, demo):
