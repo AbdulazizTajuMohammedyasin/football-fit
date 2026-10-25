@@ -74,7 +74,7 @@ function ResultCard({
             {player.nationality && <> · {player.nationality}</>}
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <div className="w-32 space-y-1">
             <div className="flex items-baseline justify-between">
               <span className="text-xs text-muted-foreground">Fit score</span>
