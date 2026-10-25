@@ -69,16 +69,18 @@ Done and committed:
 7. Frontend sign-in/sign-up, token refresh, Save popover, My shortlists page.
 8. Checks: backend 94 tests, frontend 38 tests, type check, lint, build; manual run with live FPL data and an API smoke test of auth + saved shortlists through the dev proxy.
 
-### Day 4 — Hardening, documentation and final verification
+### Day 4 — Hardening, documentation and final verification ✅ (complete)
 
-0. Run migrations and the test suite against MySQL once credentials are available (`docs/database.md`).
-1. Edge cases and bug fixes found while exercising the full journey (empty clubs, players without seasons, all-missing metrics, real-data import path).
-2. Accessibility and responsive pass (keyboard navigation, labels, mobile layout).
-3. Production settings review (secret key, allowed hosts, CORS, debug off), `.env.example` files.
-4. README: setup, data sources and licensing, demo-data warning, CSV schema, scoring explanation.
-5. Final verification: ruff, pytest, oxlint, type check, Vitest, production build; record results.
+Done and committed:
+
+1. MySQL verified: settings read the owner's `DB_*` variables; migrations applied to MySQL 8.0.43; both real (FPL) and demo data loaded. Running on MySQL exposed two bugs SQLite hid — slugs over 50 characters for long names and names longer than their column — both fixed with a migration, truncation and clear import errors.
+2. Need-level thresholds served by `/api/meta` instead of hard-coded in the UI.
+3. Unsupported roles for a club's data source now return a 400 with an explanation.
+4. Production settings (`DJANGO_ENV=production`): secure cookies, HTTPS redirect, frame denial, opt-in HSTS; `check --deploy` leaves only the deliberate HSTS opt-in warning.
+5. Responsive and accessibility pass: all main pages checked at a real 390 px viewport via Chrome DevTools emulation (one overflow fixed) and scanned with axe-core for WCAG 2 A/AA (no violations).
+6. README with setup, data-source limits, scoring summary, CSV schema and API overview.
+7. Final checks: backend 97 tests on MySQL and on SQLite, ruff, `manage.py check`, no pending migrations; frontend 38 tests, type check, oxlint (0 errors, 5 fast-refresh warnings), production build.
 
 ## Blockers and limits
 
-- MySQL 8 is installed locally but its credentials are not available to the agent, so migrations and tests have only run on SQLite. Action: create the database/user per `docs/database.md` and set `DATABASE_URL` in `backend/.env`.
 - The FPL API is unofficial and no published licence was found; it is labelled as such and suitable for personal, non-commercial use only. FPL lists broad positions only.
