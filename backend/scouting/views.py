@@ -151,7 +151,12 @@ def club_recommendations(request, slug):
         limit=params["limit"],
     )
     league = league_for_club(club)
-    result = shortlist(league.context, club.id, ROLES_BY_KEY[params["role"]], filters)
+    role = ROLES_BY_KEY[params["role"]]
+    if role not in league.context.available_roles(role.position):
+        raise ValidationError(
+            {"role": [f"{role.name} needs metrics this club's data source does not provide."]}
+        )
+    result = shortlist(league.context, club.id, role, filters)
     return Response(
         {
             "club": s.club_summary(club),

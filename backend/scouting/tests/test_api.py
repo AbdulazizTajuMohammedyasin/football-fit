@@ -146,3 +146,10 @@ def test_player_position_filter_includes_secondary_positions(client, demo):
     players = Player.objects.filter(slug__in=slugs)
     assert all(p.position == "AM" or "AM" in p.secondary_positions for p in players)
     assert any(p.position != "AM" for p in players)
+
+
+def test_recommendations_reject_roles_the_league_data_cannot_support(client, club):
+    # The demo league records detailed positions, so FPL broad-position roles have no data.
+    response = client.get(f"/api/clubs/{club.slug}/recommendations/?role=fw-finisher")
+    assert response.status_code == 400
+    assert "does not provide" in response.json()["role"][0]
