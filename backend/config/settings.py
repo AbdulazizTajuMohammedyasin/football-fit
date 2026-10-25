@@ -171,5 +171,16 @@ DJOSER = {
     "HIDE_USERS": True,
 }
 
+if os.environ.get("DJANGO_ENV") == "production":
+    # Served over HTTPS in production. HSTS is opt-in because it is hard to undo.
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = env_bool("DJANGO_SSL_REDIRECT", default=True)
+    SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_HSTS_SECONDS", "0"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = SECURE_HSTS_SECONDS > 0
+    if env_bool("DJANGO_BEHIND_PROXY"):
+        SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    X_FRAME_OPTIONS = "DENY"
+
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173")
 CORS_ALLOW_METHODS = ["GET", "POST", "PATCH", "DELETE", "OPTIONS"]
