@@ -14,7 +14,9 @@ class SavedShortlist(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="shortlists"
     )
     name = models.CharField(max_length=100)
-    club_slug = models.SlugField(blank=True, help_text="Club the list was built for, if any.")
+    club_slug = models.SlugField(
+        max_length=120, blank=True, help_text="Club the list was built for, if any."
+    )
     role_key = models.CharField(max_length=40, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -28,7 +30,7 @@ class SavedShortlist(models.Model):
 
 class SavedPlayer(models.Model):
     shortlist = models.ForeignKey(SavedShortlist, on_delete=models.CASCADE, related_name="entries")
-    player_slug = models.SlugField()
+    player_slug = models.SlugField(max_length=120)
     note = models.CharField(max_length=500, blank=True)
     added_at = models.DateTimeField(auto_now_add=True)
 

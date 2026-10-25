@@ -14,7 +14,7 @@ import urllib.request
 from datetime import date
 from typing import Any
 
-from .importers import ImportResult, SourceInfo, write_rows
+from .importers import CsvImportError, ImportResult, SourceInfo, write_rows
 from .metrics import MetricValidationError, validate_metrics
 
 FPL_BOOTSTRAP_URL = "https://fantasy.premierleague.com/api/bootstrap-static/"
@@ -159,6 +159,10 @@ def player_rows(data: dict) -> tuple[list[dict[str, Any]], int]:
 
 def import_bootstrap(data: dict, as_of: date) -> tuple[ImportResult, int, str]:
     rows, skipped = player_rows(data)
+    return _write(rows, as_of), skipped, rows[0]["season"]
+
+
+def _write(rows: list[dict[str, Any]], as_of: date) -> ImportResult:
     info = SourceInfo(
         slug=FPL_SOURCE_SLUG,
         name="Fantasy Premier League (unofficial public API)",
@@ -168,4 +172,7 @@ def import_bootstrap(data: dict, as_of: date) -> tuple[ImportResult, int, str]:
         notes=SOURCE_NOTES,
         is_demo=False,
     )
-    return write_rows(rows, info), skipped, rows[0]["season"]
+    try:
+        return write_rows(rows, info)
+    except CsvImportError as exc:
+        raise FplImportError(str(exc)) from exc

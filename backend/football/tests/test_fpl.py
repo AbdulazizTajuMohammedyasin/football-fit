@@ -130,3 +130,23 @@ def test_command_rejects_bad_files(tmp_path):
     with pytest.raises(CommandError, match="nothing was written"):
         call_command("import_fpl", file=path)
     assert not DataSource.objects.filter(slug="fpl").exists()
+
+
+def test_very_long_names_get_slugs_that_fit_the_column():
+    # 118 characters: fits the name column, but its slug must be cut to fit the slug column.
+    surname = ("de Albuquerque " * 6).strip()
+    long_name = element(1, 3, first_name="António João Pereira Tavares", second_name=surname)
+    twin = element(2, 3, first_name="António João Pereira Tavares", second_name=surname)
+    twin["birth_date"] = "2001-02-03"
+    import_bootstrap(bootstrap(long_name, twin), date(2026, 10, 24))
+    slugs = list(Player.objects.values_list("slug", flat=True))
+    max_length = Player._meta.get_field("slug").max_length
+    assert len(slugs) == 2 and len(set(slugs)) == 2
+    assert all(len(slug) <= max_length for slug in slugs)
+
+
+def test_names_longer_than_the_column_abort_the_import_cleanly():
+    too_long = element(1, 3, second_name="x" * 200)
+    with pytest.raises(FplImportError, match="longer than 120"):
+        import_bootstrap(bootstrap(too_long), date(2026, 10, 24))
+    assert not DataSource.objects.filter(slug="fpl").exists()

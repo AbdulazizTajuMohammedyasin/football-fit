@@ -31,7 +31,7 @@ class DataSource(models.Model):
 
 class Club(models.Model):
     source = models.ForeignKey(DataSource, on_delete=models.CASCADE, related_name="clubs")
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(max_length=120, unique=True)
     name = models.CharField(max_length=120)
     short_name = models.CharField(max_length=40, blank=True)
     competition = models.CharField(max_length=80, default="Premier League")
@@ -55,7 +55,7 @@ class Player(models.Model):
         BOTH = "both", "Both"
 
     source = models.ForeignKey(DataSource, on_delete=models.CASCADE, related_name="players")
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(max_length=120, unique=True)
     name = models.CharField(max_length=120)
     club = models.ForeignKey(
         Club, on_delete=models.SET_NULL, null=True, blank=True, related_name="players"

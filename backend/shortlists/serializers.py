@@ -99,7 +99,7 @@ class SavedShortlistSerializer(serializers.ModelSerializer):
 
 
 class AddPlayerSerializer(serializers.Serializer):
-    player_slug = serializers.SlugField()
+    player_slug = serializers.SlugField(max_length=120)
     note = serializers.CharField(max_length=500, required=False, allow_blank=True, default="")
 
     def validate_player_slug(self, value: str) -> str:

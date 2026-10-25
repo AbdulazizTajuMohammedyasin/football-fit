@@ -140,7 +140,10 @@ def read_rows(path: Path, default_competition: str) -> list[dict]:
 
 
 def _unique_slug(model, base: str, taken: set[str]) -> str:
-    slug = base or "item"
+    """A slug unused in the database and this import, cut to fit the slug column."""
+    max_length = model._meta.get_field("slug").max_length
+    base = (base or "item")[: max_length - 4].rstrip("-")
+    slug = base
     suffix = 2
     while slug in taken or model.objects.filter(slug=slug).exists():
         slug = f"{base}-{suffix}"
@@ -161,6 +164,15 @@ def write_rows(rows: list[dict], info: SourceInfo) -> ImportResult:
 
     Each row holds the keys produced by `_parse_row`, plus an optional `club_short_name`.
     """
+    limits = {
+        "player": Player._meta.get_field("name").max_length,
+        "club": Club._meta.get_field("name").max_length,
+    }
+    for index, row in enumerate(rows, start=1):
+        for key, limit in limits.items():
+            if len(row[key]) > limit:
+                raise CsvImportError(f"row {index}: {key} name is longer than {limit} characters")
+
     DataSource.objects.filter(slug=info.slug).delete()
     source = DataSource.objects.create(
         slug=info.slug,
