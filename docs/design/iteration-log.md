@@ -36,3 +36,20 @@ Each entry lists what the screenshots showed, what was fixed, and what was check
   1,180 px down). At 1440×1000, 16+ clubs are visible. The Open button and Enter both open the
   first match (verified: "new" opens `/clubs/newcastle`, "ars" opens `/clubs/arsenal`). The
   no-match text appears. Home tests 3/3. No overflow at 390, 768 or 1440; no console errors.
+
+## M3: club needs and squad (2026-10-28)
+
+- **Built:** a compact ink header (about 200 px at 1440, was about 400) and Radix tabs restyled as a
+  pill group. The pitch need map sits on a light surface beside a ranked list of positions: need
+  meter and word, score, "biggest factor" (the component with the largest weighted contribution,
+  derived from the API values), an expandable "Evidence and components" panel, and the first role
+  as the arrow action. The top need carries a signal edge. The squad tab uses the pill filter, the
+  table styles, and the phone list.
+- **Iteration 1 findings:** P1: one desktop capture came out blank, but it re-rendered normally on
+  recapture (first capture of a fresh browser), so this was not a page fault. P2: pitch stripes
+  were too contrasty against the paper surface; softened. P2: three component columns beside the
+  map wrapped their "weight" labels; they now stack at `lg` and return to three columns at `xl`.
+- **Acceptance:** header ≤ 260 px; the top need is distinct (signal edge plus first position);
+  `?tab=squad` is set by clicking the tab (verified URL); `#need-FW` is set by a pitch marker
+  (verified URL); markers are 44 px; need level is always written as a word. No overflow at 390 or
+  1440; no console errors.

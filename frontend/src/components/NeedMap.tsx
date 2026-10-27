@@ -44,7 +44,7 @@ export function NeedMap({ needs, className }: { needs: PositionNeed[]; className
       <div className="relative overflow-hidden rounded-xl border bg-paper">
         <svg viewBox="0 0 105 68" className="block h-auto w-full" aria-hidden>
           {Array.from({ length: 7 }, (_, i) => (
-            <rect key={i} x={i * 15} y="0" width="7.5" height="68" className="fill-tissue/60" />
+            <rect key={i} x={i * 15} y="0" width="7.5" height="68" className="fill-tissue/40" />
           ))}
           <g fill="none" className="stroke-line-strong/60" strokeWidth="0.3">
             <rect x="0.5" y="0.5" width="104" height="67" />
