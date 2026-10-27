@@ -22,3 +22,17 @@ Each entry lists what the screenshots showed, what was fixed, and what was check
   keyboard Tab shows a visible focus ring on nav pills; no overflow at 390 or 1440.
 - **Known interim state:** pages not yet migrated still use old class names through the aliases
   (bold weights in places, ink bands where the club and player headers will change in M3 and M5).
+
+## M2: home (2026-10-28)
+
+- **Built:** a left-aligned hero with the question as the headline and a composite "Filter clubs"
+  search with a signal "Open" button that opens the first match. Live feedback names the club that
+  Enter will open. Under it: the four-step journey as one mono line, an ink provenance strip
+  (sources, real or fictional, as-of dates and club count, all from the API; it moves below the
+  list on phones), and the clubs as dense rows grouped by source.
+- **Iteration 1 findings:** P2: "1 clubs" when a filter leaves one club. Fixed the plural. P3: on
+  phones the group's club count wrapped to its own right-aligned line; it now sits inline.
+- **Acceptance:** at 390×844 the search and 3 clubs are visible without scrolling (was about
+  1,180 px down). At 1440×1000, 16+ clubs are visible. The Open button and Enter both open the
+  first match (verified: "new" opens `/clubs/newcastle`, "ars" opens `/clubs/arsenal`). The
+  no-match text appears. Home tests 3/3. No overflow at 390, 768 or 1440; no console errors.
