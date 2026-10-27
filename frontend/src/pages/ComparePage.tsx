@@ -7,6 +7,7 @@ import type { Comparison } from '@/api/types'
 import { RoleSelect } from '@/components/RoleSelect'
 import { CoverageBadge, ScoreBar } from '@/components/score'
 import { SourceLine } from '@/components/SourceLine'
+import { PageBody, PageHeader } from '@/components/page'
 import { EmptyState, ErrorState, LoadingState } from '@/components/states'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -16,7 +17,6 @@ import { MAX_PLAYERS, parsePlayers } from '@/lib/compareParams'
 import { formatAge, formatMetric, formatNumber, formatScore, NOT_RECORDED, ordinal } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
-
 function PlayerPicker({ selected, onAdd }: { selected: string[]; onAdd: (slug: string) => void }) {
   const [term, setTerm] = useState('')
   const search = usePlayerSearch(term)
@@ -25,12 +25,14 @@ function PlayerPicker({ selected, onAdd }: { selected: string[]; onAdd: (slug: s
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="player-search">Add a player</Label>
+      <Label htmlFor="player-search" className="font-semibold">
+        Add a player
+      </Label>
       <div className="relative">
-        <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" aria-hidden />
+        <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
         <Input
           id="player-search"
-          className="pl-8"
+          className="h-10 pl-9"
           placeholder={full ? `Maximum ${MAX_PLAYERS} players` : 'Search by name (2+ letters)'}
           value={term}
           disabled={full}
@@ -46,12 +48,12 @@ function PlayerPicker({ selected, onAdd }: { selected: string[]; onAdd: (slug: s
           ) : results.length === 0 ? (
             <p className="text-sm text-muted-foreground">No players found.</p>
           ) : (
-            <ul className="divide-y rounded-md border bg-card">
+            <ul className="divide-y overflow-hidden rounded-md border bg-card shadow-sm">
               {results.map((player) => (
                 <li key={player.slug}>
                   <button
                     type="button"
-                    className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
+                    className="flex min-h-11 w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
                     onClick={() => {
                       onAdd(player.slug)
                       setTerm('')
@@ -75,6 +77,13 @@ function PlayerPicker({ selected, onAdd }: { selected: string[]; onAdd: (slug: s
   )
 }
 
+const SERIES = [
+  { fill: 'bg-series-1', border: 'border-t-series-1' },
+  { fill: 'bg-series-2', border: 'border-t-series-2' },
+  { fill: 'bg-series-3', border: 'border-t-series-3' },
+  { fill: 'bg-series-4', border: 'border-t-series-4' },
+]
+
 function ComparisonTable({ data }: { data: Comparison }) {
   const meta = useMeta()
   const units = new Map((meta.data?.metrics ?? []).map((metric) => [metric.key, metric.unit]))
@@ -90,71 +99,104 @@ function ComparisonTable({ data }: { data: Comparison }) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border bg-card">
-      <Table>
+    <div className="overflow-hidden rounded-lg border bg-card" data-scroll-x>
+      <Table className="table-fixed" style={{ minWidth: `${8 + entries.length * 10}rem` }}>
         <TableHeader>
-          <TableRow>
-            <TableHead className="min-w-44">Metric (weight)</TableHead>
-            {entries.map((entry) => (
-              <TableHead key={entry.player.slug} className="min-w-40 align-top">
-                <Link to={`/players/${entry.player.slug}`} className="font-semibold text-foreground hover:underline">
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="sticky left-0 z-10 w-32 bg-card pl-4 align-bottom sm:w-56">Metric (weight)</TableHead>
+            {entries.map((entry, index) => (
+              <TableHead
+                key={entry.player.slug}
+                className={cn('h-auto border-t-4 py-3 align-top whitespace-normal', SERIES[index].border)}
+              >
+                <Link
+                  to={`/players/${entry.player.slug}`}
+                  className="font-display text-lg leading-tight font-semibold text-foreground hover:underline"
+                >
                   {entry.player.name}
                 </Link>
-                <div className="text-xs font-normal">
-                  {entry.player.position} · {entry.player.club?.name ?? 'No club'} · {formatAge(entry.player.age)}
+                <div className="mt-0.5 text-xs font-normal text-muted-foreground">
+                  {entry.player.position}, {entry.player.club?.name ?? 'No club'}, age {formatAge(entry.player.age)}
                 </div>
               </TableHead>
             ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow className="bg-muted/40">
-            <TableCell className="font-medium">Role score</TableCell>
-            {entries.map((entry) => (
-              <TableCell key={entry.player.slug} className="space-y-1">
-                <span className="text-lg font-semibold tabular-nums">{formatScore(entry.role_score.score)}</span>
-                <ScoreBar value={entry.role_score.score} label={`${entry.player.name} role score`} />
+          <TableRow className="bg-muted/50 hover:bg-muted/50">
+            <TableCell className="sticky left-0 z-10 bg-muted pl-4 font-semibold">Role score</TableCell>
+            {entries.map((entry, index) => (
+              <TableCell key={entry.player.slug} className="space-y-2 py-4 whitespace-normal">
+                <span className="block font-display text-4xl leading-none font-bold tabular-nums">
+                  {formatScore(entry.role_score.score)}
+                </span>
+                <ScoreBar
+                  value={entry.role_score.score}
+                  label={`${entry.player.name} role score`}
+                  tone={SERIES[index].fill}
+                />
                 <div className="flex flex-wrap gap-1">
                   <CoverageBadge coverage={entry.role_score.coverage} />
-                  {entry.out_of_position && <Badge variant="outline">Out of position</Badge>}
-                  {!entry.has_season && <Badge variant="outline">No season data</Badge>}
+                  {entry.out_of_position && (
+                    <Badge variant="outline" className="rounded-sm">
+                      Out of position
+                    </Badge>
+                  )}
+                  {!entry.has_season && (
+                    <Badge variant="outline" className="rounded-sm">
+                      No season data
+                    </Badge>
+                  )}
                 </div>
               </TableCell>
             ))}
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium">League minutes</TableCell>
+            <TableCell className="sticky left-0 z-10 bg-card pl-4 font-medium">League minutes</TableCell>
             {entries.map((entry) => (
-              <TableCell key={entry.player.slug} className="tabular-nums">
+              <TableCell key={entry.player.slug} className="font-display text-lg font-semibold tabular-nums">
                 {formatNumber(entry.player.minutes)}
               </TableCell>
             ))}
           </TableRow>
           {data.role.weights.map((weight) => (
             <TableRow key={weight.metric}>
-              <TableCell>
-                {weight.label}{' '}
+              <TableCell className="sticky left-0 z-10 bg-card pl-4 whitespace-normal">
+                <span className="font-medium">{weight.label}</span>{' '}
                 <span className="text-xs text-muted-foreground">({Math.round(weight.weight * 100)}%)</span>
               </TableCell>
-              {entries.map((entry) => {
+              {entries.map((entry, index) => {
                 const component = entry.role_score.components.find((c) => c.metric === weight.metric)
                 const value = component?.value ?? null
                 const percentile = component?.percentile ?? null
                 const isBest = percentile !== null && best.get(weight.metric) === percentile
                 return (
-                  <TableCell key={entry.player.slug} className={cn(isBest && 'bg-emerald-50')}>
+                  <TableCell key={entry.player.slug} className={cn('whitespace-normal', isBest && 'bg-accent')}>
                     {value === null ? (
                       <span className="text-xs italic text-muted-foreground">{NOT_RECORDED}</span>
                     ) : (
-                      <span className="tabular-nums">
-                        {formatMetric(value, units.get(weight.metric) ?? 'per90')}
-                        {percentile !== null && (
-                          <span className="ml-1 text-xs text-muted-foreground">
-                            ({ordinal(Math.round(percentile))} pct.)
+                      <div className="space-y-1.5">
+                        <span className="flex flex-wrap items-baseline gap-x-1.5 tabular-nums">
+                          <span className="font-display text-lg font-semibold">
+                            {formatMetric(value, units.get(weight.metric) ?? 'per90')}
                           </span>
-                        )}
-                        {isBest && <span className="sr-only"> (best in comparison)</span>}
-                      </span>
+                          {percentile !== null && (
+                            <span className="text-xs text-muted-foreground">
+                              ({ordinal(Math.round(percentile))} pct.)
+                            </span>
+                          )}
+                          {isBest && (
+                            <span className="rounded-sm bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
+                              Best<span className="sr-only"> in comparison</span>
+                            </span>
+                          )}
+                        </span>
+                        <ScoreBar
+                          value={percentile}
+                          label={`${entry.player.name} ${weight.label} percentile`}
+                          tone={SERIES[index].fill}
+                        />
+                      </div>
                     )}
                   </TableCell>
                 )
@@ -190,73 +232,85 @@ export function ComparePage() {
   const names = new Map((comparison.data?.players ?? []).map((entry) => [entry.player.slug, entry.player.name]))
 
   return (
-    <div className="space-y-6">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Compare players</h1>
-        <p className="max-w-3xl text-muted-foreground">
-          Compare 2–{MAX_PLAYERS} players on the same role profile. Percentiles are measured against players in the
-          role's position with enough minutes, so out-of-position players are judged on the role's own standards.
-        </p>
-      </header>
-
-      <div className="grid gap-4 rounded-lg border bg-card p-4 md:grid-cols-2">
-        <div className="space-y-3">
-          <PlayerPicker selected={players} onAdd={(slug) => setPlayers([...players, slug])} />
-          {players.length > 0 && (
-            <ul className="flex flex-wrap gap-2" aria-label="Selected players">
-              {players.map((slug) => (
-                <li key={slug}>
-                  <Badge variant="secondary" className="gap-1 py-1 pr-1">
-                    {names.get(slug) ?? slug}
-                    <button
-                      type="button"
-                      className="rounded-sm p-0.5 hover:bg-background"
-                      onClick={() => setPlayers(players.filter((item) => item !== slug))}
-                      aria-label={`Remove ${names.get(slug) ?? slug}`}
-                    >
-                      <X className="size-3" aria-hidden />
-                    </button>
-                  </Badge>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="compare-role">Role profile</Label>
-          {meta.data ? (
-            <RoleSelect
-              id="compare-role"
-              roles={meta.data.roles}
-              positions={meta.data.positions}
-              allowed={comparison.data?.available_roles}
-              value={comparison.data?.role.key ?? roleParam ?? ''}
-              onChange={setRole}
-            />
-          ) : (
-            <p className="text-sm text-muted-foreground">Loading roles…</p>
-          )}
-          {comparison.data && <p className="text-sm text-muted-foreground">{comparison.data.role.summary}</p>}
-        </div>
-      </div>
-
-      {players.length < 2 ? (
-        <EmptyState title="Add at least two players">
-          Search above, or pick players from a club shortlist and choose “Compare”.
-        </EmptyState>
-      ) : comparison.isPending ? (
-        <LoadingState label="Comparing players" rows={3} />
-      ) : comparison.isError ? (
-        <ErrorState error={comparison.error} title="Could not compare these players" />
-      ) : (
-        <div className="space-y-2">
-          <SourceLine meta={comparison.data} />
-          <ComparisonTable data={comparison.data} />
-          <p className="text-xs text-muted-foreground">
-            Shaded cells mark the highest percentile among the compared players for that metric.
+    <>
+      <PageHeader
+        context="Side by side on one role profile"
+        title="Compare players"
+        meta={
+          <p className="max-w-3xl">
+            Compare 2–{MAX_PLAYERS} players on the same role profile. Percentiles are measured against players in
+            the role's position with enough minutes, so out-of-position players are judged on the role's own
+            standards.
           </p>
+        }
+      />
+
+      <PageBody className="space-y-6">
+        <div className="grid gap-5 rounded-lg border bg-card p-5 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] md:gap-8">
+          <div className="space-y-3">
+            <PlayerPicker selected={players} onAdd={(slug) => setPlayers([...players, slug])} />
+            {players.length > 0 && (
+              <ul className="flex flex-wrap gap-2" aria-label="Selected players">
+                {players.map((slug, index) => (
+                  <li key={slug}>
+                    <span className="inline-flex items-center gap-2 rounded-md border bg-background py-1 pr-1 pl-2.5 text-sm font-medium">
+                      <span className={cn('size-2.5 rounded-full', SERIES[index]?.fill)} aria-hidden />
+                      {names.get(slug) ?? slug}
+                      <button
+                        type="button"
+                        className="grid size-7 place-items-center rounded-sm hover:bg-muted"
+                        onClick={() => setPlayers(players.filter((item) => item !== slug))}
+                        aria-label={`Remove ${names.get(slug) ?? slug}`}
+                      >
+                        <X className="size-3.5" aria-hidden />
+                      </button>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="compare-role" className="font-semibold">
+              Role profile
+            </Label>
+            {meta.data ? (
+              <RoleSelect
+                id="compare-role"
+                roles={meta.data.roles}
+                positions={meta.data.positions}
+                allowed={comparison.data?.available_roles}
+                value={comparison.data?.role.key ?? roleParam ?? ''}
+                onChange={setRole}
+              />
+            ) : meta.isError ? (
+              <p className="text-sm text-destructive">Could not load roles: {meta.error.message}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">Loading roles…</p>
+            )}
+            {comparison.data && <p className="text-sm text-muted-foreground">{comparison.data.role.summary}</p>}
+          </div>
         </div>
-      )}
-    </div>
+
+        {players.length < 2 ? (
+          <EmptyState title="Add at least two players">
+            Search above, or pick players from a club shortlist and choose “Compare”.
+          </EmptyState>
+        ) : comparison.isPending ? (
+          <LoadingState label="Comparing players" rows={3} />
+        ) : comparison.isError ? (
+          <ErrorState error={comparison.error} title="Could not compare these players" />
+        ) : (
+          <div className="space-y-3">
+            <SourceLine meta={comparison.data} />
+            <p className="text-xs text-muted-foreground sm:hidden">Swipe the table sideways to see every player.</p>
+            <ComparisonTable data={comparison.data} />
+            <p className="text-xs text-muted-foreground">
+              “Best” and the shaded cell mark the highest percentile among the compared players for that metric.
+            </p>
+          </div>
+        )}
+      </PageBody>
+    </>
   )
 }
