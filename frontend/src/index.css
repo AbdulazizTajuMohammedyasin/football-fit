@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* The product has a single light theme; dark: variants from shadcn primitives only apply under .dark. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -22,47 +25,129 @@
   --color-ring: var(--ring);
   --color-pitch: var(--pitch);
   --color-pitch-foreground: var(--pitch-foreground);
+  --color-pitch-muted: var(--pitch-muted);
+  --color-pitch-line: var(--pitch-line);
+  --color-floodlight: var(--floodlight);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-need-high: var(--need-high);
+  --color-need-high-soft: var(--need-high-soft);
+  --color-need-medium: var(--need-medium);
+  --color-need-medium-soft: var(--need-medium-soft);
+  --color-need-low: var(--need-low);
+  --color-need-low-soft: var(--need-low-soft);
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-series-3: var(--series-3);
+  --color-series-4: var(--series-4);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 8px);
+  --font-sans: "Barlow", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Barlow Condensed", "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
 }
 
+/*
+ * "Floodlit scouting report": pitch-night bands for identity, chalk working surfaces,
+ * condensed scoreboard numerals. Need colours always travel with a text label.
+ */
 :root {
-  --radius: 0.5rem;
-  --background: oklch(0.985 0.003 150);
-  --foreground: oklch(0.2 0.02 160);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.02 160);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.02 160);
-  --primary: oklch(0.42 0.11 158);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.955 0.01 155);
-  --secondary-foreground: oklch(0.25 0.03 160);
-  --muted: oklch(0.955 0.008 155);
-  --muted-foreground: oklch(0.48 0.02 160);
-  --accent: oklch(0.94 0.02 155);
-  --accent-foreground: oklch(0.25 0.03 160);
-  --destructive: oklch(0.55 0.2 27);
-  --border: oklch(0.9 0.01 155);
-  --input: oklch(0.88 0.01 155);
-  --ring: oklch(0.55 0.11 158);
-  --pitch: oklch(0.3 0.07 160);
-  --pitch-foreground: oklch(0.97 0.01 155);
-  --warning: oklch(0.95 0.06 85);
-  --warning-foreground: oklch(0.38 0.08 65);
+  --radius: 0.375rem;
+  --background: #f3f5f1;
+  --foreground: #14211c;
+  --card: #ffffff;
+  --card-foreground: #14211c;
+  --popover: #ffffff;
+  --popover-foreground: #14211c;
+  --primary: #14684a;
+  --primary-foreground: #ffffff;
+  --secondary: #e6ece7;
+  --secondary-foreground: #1b2e26;
+  --muted: #e9eee9;
+  --muted-foreground: #4f5f58;
+  --accent: #e3ede6;
+  --accent-foreground: #14211c;
+  --destructive: #b42318;
+  --border: #d3dcd5;
+  --input: #c3cec6;
+  --ring: #14684a;
+  --pitch: #0d2a20;
+  --pitch-foreground: #f1f6f2;
+  --pitch-muted: #a9c2b6;
+  --pitch-line: rgb(255 255 255 / 0.14);
+  --floodlight: #e9f27a;
+  --warning: #fdf3d7;
+  --warning-foreground: #6b4204;
+  --need-high: #b42318;
+  --need-high-soft: #fde8e5;
+  --need-medium: #b45309;
+  --need-medium-soft: #fdf0dc;
+  --need-low: #15803d;
+  --need-low-soft: #e2f4e8;
+  --series-1: #14684a;
+  --series-2: #2f54c9;
+  --series-3: #c2410c;
+  --series-4: #7c3aed;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Condensed display face for headings, scores and position codes. */
+  .font-display {
+    font-family: var(--font-display);
+    font-feature-settings: "tnum" 1;
+    letter-spacing: -0.005em;
+  }
+  /* Faint chalk lines over pitch-night bands, echoing pitch markings. */
+  .pitch-band {
+    background-color: var(--pitch);
+    background-image: radial-gradient(
+      circle at calc(100% + 40px) 50%,
+      transparent 0 219px,
+      var(--pitch-line) 220px 221px,
+      transparent 222px
+    );
+    background-repeat: no-repeat;
+    color: var(--pitch-foreground);
+  }
+  .hatched {
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--muted),
+      var(--muted) 4px,
+      var(--border) 4px,
+      var(--border) 8px
+    );
   }
 }

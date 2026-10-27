@@ -34,9 +34,9 @@ describe('format helpers', () => {
 
 describe('scoreTone and withArticle', () => {
   it('inverts colour bands for need scores', () => {
-    expect(scoreTone(90)).toBe('bg-emerald-600')
-    expect(scoreTone(90, true)).toBe('bg-rose-500')
-    expect(scoreTone(0, true)).toBe('bg-emerald-600')
+    expect(scoreTone(90)).toBe('bg-primary')
+    expect(scoreTone(90, true)).toBe('bg-need-high')
+    expect(scoreTone(0, true)).toBe('bg-primary')
     expect(scoreTone(null, true)).toBe('bg-muted-foreground/30')
   })
 

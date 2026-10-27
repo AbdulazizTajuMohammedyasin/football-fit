@@ -39,10 +39,10 @@ export function formatDate(iso: string): string {
 export function scoreTone(score: number | null | undefined, invert = false): string {
   if (score === null || score === undefined) return 'bg-muted-foreground/30'
   if (invert) score = 100 - score
-  if (score >= 75) return 'bg-emerald-600'
-  if (score >= 55) return 'bg-emerald-500/80'
-  if (score >= 35) return 'bg-amber-500'
-  return 'bg-rose-500'
+  if (score >= 75) return 'bg-primary'
+  if (score >= 55) return 'bg-primary/65'
+  if (score >= 35) return 'bg-need-medium'
+  return 'bg-need-high'
 }
 
 export function ordinal(n: number): string {
