@@ -46,7 +46,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: 'clubs/:slug', element: <ClubPage /> },
-      { path: 'clubs/:slug/shortlist', element: <PageBody><ShortlistPage /></PageBody> },
+      { path: 'clubs/:slug/shortlist', element: <ShortlistPage /> },
       { path: 'players/:slug', element: <PageBody><PlayerPage /></PageBody> },
       { path: 'compare', element: <PageBody><ComparePage /></PageBody> },
       { path: 'methodology', element: <PageBody><MethodologyPage /></PageBody> },
