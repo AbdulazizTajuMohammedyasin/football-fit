@@ -29,9 +29,9 @@ function NotFound() {
   return (
     <PageBody className="py-16 sm:py-24">
       <div className="max-w-xl space-y-4">
-        <p className="font-display text-7xl font-bold text-primary sm:text-8xl">404</p>
-        <h1 className="font-display text-4xl font-semibold tracking-tight">This page is out of play</h1>
-        <p className="text-muted-foreground">The link may be mistyped, or the page may have moved.</p>
+        <p className="type-label text-ink-2">Error 404</p>
+        <h1 className="type-hero">This page is out of play.</h1>
+        <p className="text-lg text-ink-2">The link may be mistyped, or the page may have moved.</p>
         <Button asChild>
           <Link to="/">Back to clubs</Link>
         </Button>

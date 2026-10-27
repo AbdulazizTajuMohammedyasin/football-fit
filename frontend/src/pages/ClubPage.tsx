@@ -61,7 +61,7 @@ function NeedDetail({ need, clubSlug }: { need: PositionNeed; clubSlug: string }
                   </span>
                 </dt>
                 <dd className="flex items-center gap-2">
-                  <ScoreBar value={component.value} label={component.label} invert />
+                  <ScoreBar value={component.value} label={component.label} />
                   <span className="w-8 text-right font-display text-lg font-semibold tabular-nums">
                     {component.value === null ? 'n/a' : Math.round(component.value)}
                   </span>

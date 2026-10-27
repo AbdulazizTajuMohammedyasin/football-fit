@@ -125,7 +125,7 @@ function ComparisonTable({ data }: { data: Comparison }) {
         <TableBody>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
             <TableCell className="sticky left-0 z-10 bg-muted pl-4 font-semibold">Role score</TableCell>
-            {entries.map((entry, index) => (
+            {entries.map((entry) => (
               <TableCell key={entry.player.slug} className="space-y-2 py-4 whitespace-normal">
                 <span className="block font-display text-4xl leading-none font-bold tabular-nums">
                   {formatScore(entry.role_score.score)}
@@ -133,7 +133,6 @@ function ComparisonTable({ data }: { data: Comparison }) {
                 <ScoreBar
                   value={entry.role_score.score}
                   label={`${entry.player.name} role score`}
-                  tone={SERIES[index].fill}
                 />
                 <div className="flex flex-wrap gap-1">
                   <CoverageBadge coverage={entry.role_score.coverage} />
@@ -165,7 +164,7 @@ function ComparisonTable({ data }: { data: Comparison }) {
                 <span className="font-medium">{weight.label}</span>{' '}
                 <span className="text-xs text-muted-foreground">({Math.round(weight.weight * 100)}%)</span>
               </TableCell>
-              {entries.map((entry, index) => {
+              {entries.map((entry) => {
                 const component = entry.role_score.components.find((c) => c.metric === weight.metric)
                 const value = component?.value ?? null
                 const percentile = component?.percentile ?? null
@@ -194,7 +193,6 @@ function ComparisonTable({ data }: { data: Comparison }) {
                         <ScoreBar
                           value={percentile}
                           label={`${entry.player.name} ${weight.label} percentile`}
-                          tone={SERIES[index].fill}
                         />
                       </div>
                     )}

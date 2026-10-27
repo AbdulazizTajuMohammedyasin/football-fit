@@ -5,90 +5,88 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-pitch: var(--pitch);
-  --color-pitch-foreground: var(--pitch-foreground);
-  --color-pitch-muted: var(--pitch-muted);
-  --color-pitch-line: var(--pitch-line);
-  --color-floodlight: var(--floodlight);
-  --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
-  --color-need-high: var(--need-high);
-  --color-need-high-soft: var(--need-high-soft);
-  --color-need-medium: var(--need-medium);
-  --color-need-medium-soft: var(--need-medium-soft);
-  --color-need-low: var(--need-low);
-  --color-need-low-soft: var(--need-low-soft);
-  --color-series-1: var(--series-1);
-  --color-series-2: var(--series-2);
-  --color-series-3: var(--series-3);
-  --color-series-4: var(--series-4);
-  --radius-sm: calc(var(--radius) - 2px);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 4px);
-  --radius-xl: calc(var(--radius) + 8px);
-  --font-sans: "Barlow", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Barlow Condensed", "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
+  /* Product tokens ("Matchnight lab"): see docs/design/redesign-plan.md. */
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-bone: var(--bone);
+  --color-paper: var(--paper);
+  --color-tissue: var(--tissue);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-on-ink: var(--on-ink);
+  --color-on-ink-2: var(--on-ink-2);
+  --color-line-on-ink: var(--line-on-ink);
+  --color-signal: var(--signal);
+  --color-caution: var(--caution);
+  --color-caution-bg: var(--caution-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+
+  /* shadcn/ui semantic names, mapped onto the product tokens. */
+  --color-background: var(--bone);
+  --color-foreground: var(--ink);
+  --color-card: var(--paper);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--paper);
+  --color-popover-foreground: var(--ink);
+  --color-primary: var(--ink);
+  --color-primary-foreground: var(--on-ink);
+  --color-secondary: var(--tissue);
+  --color-secondary-foreground: var(--ink);
+  --color-muted: var(--tissue);
+  --color-muted-foreground: var(--ink-2);
+  --color-accent: var(--tissue);
+  --color-accent-foreground: var(--ink);
+  --color-destructive: var(--danger);
+  --color-border: var(--line);
+  --color-input: var(--line-strong);
+  --color-ring: var(--ink);
+
+  /* Earlier names still referenced by pages awaiting migration; removed in M7. */
+  --color-pitch: var(--ink);
+  --color-pitch-foreground: var(--on-ink);
+  --color-pitch-muted: var(--on-ink-2);
+  --color-floodlight: var(--signal);
+  --color-warning: var(--caution-bg);
+  --color-warning-foreground: var(--caution);
+  --color-need-high: var(--ink);
+  --color-need-high-soft: var(--tissue);
+  --color-need-medium: var(--ink);
+  --color-need-medium-soft: var(--tissue);
+  --color-need-low: var(--ink);
+  --color-need-low-soft: var(--tissue);
+  --color-series-1: var(--ink);
+  --color-series-2: var(--ink);
+  --color-series-3: var(--ink);
+  --color-series-4: var(--ink);
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+
+  --font-sans: "Inter Tight", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-display: var(--font-sans);
 }
 
-/*
- * "Floodlit scouting report": pitch-night bands for identity, chalk working surfaces,
- * condensed scoreboard numerals. Need colours always travel with a text label.
- */
 :root {
-  --radius: 0.375rem;
-  --background: #f3f5f1;
-  --foreground: #14211c;
-  --card: #ffffff;
-  --card-foreground: #14211c;
-  --popover: #ffffff;
-  --popover-foreground: #14211c;
-  --primary: #14684a;
-  --primary-foreground: #ffffff;
-  --secondary: #e6ece7;
-  --secondary-foreground: #1b2e26;
-  --muted: #e9eee9;
-  --muted-foreground: #4f5f58;
-  --accent: #e3ede6;
-  --accent-foreground: #14211c;
-  --destructive: #b42318;
-  --border: #d3dcd5;
-  --input: #c3cec6;
-  --ring: #14684a;
-  --pitch: #0d2a20;
-  --pitch-foreground: #f1f6f2;
-  --pitch-muted: #a9c2b6;
-  --pitch-line: rgb(255 255 255 / 0.14);
-  --floodlight: #e9f27a;
-  --warning: #fdf3d7;
-  --warning-foreground: #6b4204;
-  --need-high: #b42318;
-  --need-high-soft: #fde8e5;
-  --need-medium: #b45309;
-  --need-medium-soft: #fdf0dc;
-  --need-low: #15803d;
-  --need-low-soft: #e2f4e8;
-  --series-1: #14684a;
-  --series-2: #2f54c9;
-  --series-3: #c2410c;
-  --series-4: #7c3aed;
+  --ink: #21302d;
+  --ink-2: #4b5a56;
+  --bone: #f6f6f2;
+  --paper: #ffffff;
+  --tissue: #e9ebe3;
+  --line: #d3d6cb;
+  --line-strong: #858f88;
+  --on-ink: #f6f6f2;
+  --on-ink-2: #aab8b2;
+  --line-on-ink: #46544f;
+  --signal: #d6f27a;
+  --caution: #7a4b00;
+  --caution-bg: #fbf1d6;
+  --danger: #a8241b;
+  --danger-bg: #fbe9e6;
 }
 
 @layer base {
@@ -101,6 +99,8 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
   }
   h1,
   h2,
@@ -108,8 +108,9 @@
     text-wrap: balance;
   }
   :focus-visible {
-    outline: 2px solid var(--ring);
+    outline: 2px solid var(--ink);
     outline-offset: 2px;
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--signal) 70%, transparent);
   }
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -123,31 +124,54 @@
 }
 
 @layer components {
-  /* Condensed display face for headings, scores and position codes. */
   .font-display {
-    font-family: var(--font-display);
+    font-family: var(--font-sans);
     font-feature-settings: "tnum" 1;
-    letter-spacing: -0.005em;
   }
-  /* Faint chalk lines over pitch-night bands, echoing pitch markings. */
-  .pitch-band {
-    background-color: var(--pitch);
-    background-image: radial-gradient(
-      circle at calc(100% + 40px) 50%,
-      transparent 0 219px,
-      var(--pitch-line) 220px 221px,
-      transparent 222px
-    );
-    background-repeat: no-repeat;
-    color: var(--pitch-foreground);
+  /* Display type: one regular weight; hierarchy comes from size and tight tracking. */
+  .type-hero {
+    font-size: clamp(2.75rem, 1.6rem + 4.2vw, 4.5rem);
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    font-weight: 400;
+  }
+  .type-title {
+    font-size: clamp(2.25rem, 1.75rem + 1.6vw, 3.5rem);
+    line-height: 1;
+    letter-spacing: -0.025em;
+    font-weight: 400;
+  }
+  .type-section {
+    font-size: clamp(1.5rem, 1.3rem + 0.7vw, 1.75rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    font-weight: 400;
+  }
+  .type-sub {
+    font-size: 1.25rem;
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+    font-weight: 400;
+  }
+  /* Mono metadata labels: sources, dates, column headers, codes. */
+  .type-label {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
   }
   .hatched {
     background-image: repeating-linear-gradient(
       45deg,
-      var(--muted),
-      var(--muted) 4px,
-      var(--border) 4px,
-      var(--border) 8px
+      var(--tissue),
+      var(--tissue) 4px,
+      var(--line) 4px,
+      var(--line) 8px
     );
+  }
+  /* Kept for pages awaiting migration; the decorative arcs are gone. */
+  .pitch-band {
+    background-color: var(--ink);
+    color: var(--on-ink);
   }
 }

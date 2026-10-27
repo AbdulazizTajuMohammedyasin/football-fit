@@ -33,16 +33,15 @@ export function formatDate(iso: string): string {
 }
 
 /**
- * Tailwind classes for a 0–100 score band. With `invert`, high values are bad
- * (used for need scores, where 100 means an urgent need).
+ * Tailwind fill class for a 0–100 value: more ink means a bigger value. The same scale serves
+ * fit, role and need scores, and the number is always printed beside it.
  */
-export function scoreTone(score: number | null | undefined, invert = false): string {
-  if (score === null || score === undefined) return 'bg-muted-foreground/30'
-  if (invert) score = 100 - score
-  if (score >= 75) return 'bg-primary'
-  if (score >= 55) return 'bg-primary/65'
-  if (score >= 35) return 'bg-need-medium'
-  return 'bg-need-high'
+export function scoreTone(score: number | null | undefined): string {
+  if (score === null || score === undefined) return 'bg-ink-2/30'
+  if (score >= 75) return 'bg-ink'
+  if (score >= 55) return 'bg-ink/75'
+  if (score >= 35) return 'bg-ink/50'
+  return 'bg-ink/30'
 }
 
 export function ordinal(n: number): string {
