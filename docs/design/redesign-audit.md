@@ -1,5 +1,6 @@
 # Football Fit redesign — design audit and plan
-n> **Superseded (2026-10-28):** the visual direction below is replaced by [redesign-plan.md](redesign-plan.md). The data-integrity constraints still apply.
+
+> **Superseded (2026-10-28):** the visual direction below is replaced by [redesign-plan.md](redesign-plan.md). The data-integrity constraints still apply.
 
 Date: 2026-10-27. Scope: front end only (`frontend/src`). The back end, API contracts,
 authentication, scoring and data provenance stay unchanged.
