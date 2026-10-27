@@ -261,7 +261,7 @@ export function ClubPage() {
         title={data.club.name}
         meta={<SourceLine meta={data} className="text-pitch-muted" />}
         aside={
-          <div className="w-full lg:w-[30rem]">
+          <div className="w-full max-w-xl lg:w-[30rem]">
             <HeaderNeedMap slug={slug} />
           </div>
         }

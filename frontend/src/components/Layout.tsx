@@ -162,7 +162,7 @@ export function Layout() {
             Fit scores are transparent ranking aids built from recorded statistics, not predictions of transfer
             success.
           </p>
-          <Link to="/methodology" className="font-medium text-pitch-foreground underline-offset-4 hover:underline">
+          <Link to="/methodology" className="shrink-0 font-medium text-pitch-foreground underline-offset-4 hover:underline">
             Read how scoring works
           </Link>
         </Container>
