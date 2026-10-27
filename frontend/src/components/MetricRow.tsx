@@ -21,14 +21,19 @@ export function MetricRow({
   const missing = value === null
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 sm:grid-cols-[minmax(0,14rem)_6rem_minmax(0,1fr)_3rem]">
-      <span className="text-sm">
+      <span className="text-sm font-medium">
         {label}
-        {!higherIsBetter && <span className="ml-1 text-xs text-muted-foreground">(lower is better)</span>}
+        {!higherIsBetter && <span className="ml-1 text-xs font-normal text-muted-foreground">(lower is better)</span>}
         {weight !== undefined && (
-          <span className="ml-1 text-xs text-muted-foreground">· {Math.round(weight * 100)}%</span>
+          <span className="ml-1 text-xs font-normal text-muted-foreground">· {Math.round(weight * 100)}%</span>
         )}
       </span>
-      <span className={cn('text-right text-sm tabular-nums', missing && 'text-xs italic text-muted-foreground')}>
+      <span
+        className={cn(
+          'text-right font-display text-base font-semibold tabular-nums',
+          missing && 'font-sans text-xs font-normal italic text-muted-foreground',
+        )}
+      >
         {missing ? NOT_RECORDED : formatMetric(value, unit)}
       </span>
       <ScoreBar

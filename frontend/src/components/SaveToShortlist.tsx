@@ -20,11 +20,14 @@ export function SaveToShortlist({
   playerName,
   clubSlug,
   roleKey,
+  className,
 }: {
   playerSlug: string
   playerName: string
   clubSlug?: string
   roleKey?: string
+  /** Extra classes for the trigger button (for example on dark surfaces). */
+  className?: string
 }) {
   const { user } = useAuth()
   const location = useLocation()
@@ -37,7 +40,7 @@ export function SaveToShortlist({
 
   if (!user) {
     return (
-      <Button asChild variant="ghost" size="sm">
+      <Button asChild variant="ghost" size="sm" className={className}>
         <Link to={`/signin?next=${encodeURIComponent(location.pathname + location.search)}`}>
           <Bookmark aria-hidden /> Sign in to save
         </Link>
@@ -79,7 +82,7 @@ export function SaveToShortlist({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" aria-label={`Save ${playerName} to a shortlist`}>
+        <Button variant="ghost" size="sm" className={className} aria-label={`Save ${playerName} to a shortlist`}>
           <Bookmark aria-hidden className={savedIn.size ? 'fill-current' : undefined} />
           {savedIn.size ? 'Saved' : 'Save'}
         </Button>
