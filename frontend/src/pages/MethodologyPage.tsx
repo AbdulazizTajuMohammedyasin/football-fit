@@ -1,9 +1,21 @@
 import type { ReactNode } from 'react'
 
 import { useMeta } from '@/api/queries'
-import { ErrorState, LoadingState } from '@/components/states'
+import { PageBody, PageHeader } from '@/components/page'
+import { PositionChip } from '@/components/score'
+import { PageError, PageLoading } from '@/components/states'
 import { Badge } from '@/components/ui/badge'
 import { formatDate, formatPercent } from '@/lib/format'
+
+const CONTENTS = [
+  ['sources', 'Data sources'],
+  ['missing', 'Missing data'],
+  ['role-score', 'Role scores'],
+  ['fit-score', 'Fit score'],
+  ['needs', 'Club needs'],
+  ['roles', 'Role profiles'],
+  ['glossary', 'Metric glossary'],
+] as const
 
 const FIT_LABELS: Record<string, string> = {
   role_quality: 'Role quality — weighted percentile across the role profile',
@@ -19,8 +31,8 @@ const NEED_LABELS: Record<string, string> = {
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
-    <section aria-labelledby={id} className="space-y-3">
-      <h2 id={id} className="text-xl font-semibold">
+    <section aria-labelledby={`${id}-heading`} id={id} className="scroll-mt-24 space-y-4 border-t pt-8 first:border-0 first:pt-0">
+      <h2 id={`${id}-heading`} className="font-display text-3xl font-semibold tracking-tight">
         {title}
       </h2>
       {children}
@@ -32,9 +44,12 @@ function WeightList({ weights, labels }: { weights: Record<string, number>; labe
   return (
     <ul className="divide-y rounded-lg border bg-card">
       {Object.entries(weights).map(([key, weight]) => (
-        <li key={key} className="flex items-start justify-between gap-4 px-4 py-2 text-sm">
+        <li key={key} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 px-4 py-3 text-sm">
           <span>{labels[key] ?? key}</span>
-          <span className="font-semibold tabular-nums">{formatPercent(weight)}</span>
+          <span className="font-display text-2xl font-semibold tabular-nums">{formatPercent(weight)}</span>
+          <span className="col-span-2 block h-1 overflow-hidden rounded-full bg-muted" aria-hidden>
+            <span className="block h-full bg-pitch" style={{ width: `${weight * 100}%` }} />
+          </span>
         </li>
       ))}
     </ul>
@@ -43,21 +58,40 @@ function WeightList({ weights, labels }: { weights: Record<string, number>; labe
 
 export function MethodologyPage() {
   const meta = useMeta()
-  if (meta.isPending) return <LoadingState label="Loading methodology" />
-  if (meta.isError) return <ErrorState error={meta.error} onRetry={() => meta.refetch()} />
+  if (meta.isPending) return <PageLoading label="Loading methodology" />
+  if (meta.isError) return <PageError error={meta.error} onRetry={() => meta.refetch()} />
 
   const { scoring, roles, positions, metrics, sources } = meta.data
 
   return (
-    <article className="max-w-4xl space-y-10">
-      <header className="space-y-3">
-        <h1 className="text-3xl font-semibold tracking-tight">How scoring works</h1>
-        <p className="text-lg text-muted-foreground">
-          Every number in Football Fit comes from recorded statistics and fixed, published rules. The same inputs
-          always give the same result. A fit score ranks candidates for a role; it is not a probability that a
-          transfer will work.
-        </p>
-      </header>
+    <>
+      <PageHeader
+        band
+        title="How scoring works"
+        meta={
+          <p className="max-w-2xl text-lg">
+            Every number in Football Fit comes from recorded statistics and fixed, published rules. The same inputs
+            always give the same result. A fit score ranks candidates for a role; it is not a probability that a
+            transfer will work.
+          </p>
+        }
+      />
+      <PageBody className="grid gap-10 lg:grid-cols-[13rem_minmax(0,1fr)]">
+        <nav aria-label="On this page" className="hidden lg:block">
+          <ul className="sticky top-24 space-y-1 border-l text-sm">
+            {CONTENTS.map(([id, label]) => (
+              <li key={id}>
+                <a
+                  href={`#${id}`}
+                  className="-ml-px block border-l-2 border-transparent py-1 pl-4 text-muted-foreground hover:border-primary hover:text-foreground"
+                >
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <article className="max-w-3xl min-w-0 space-y-10 leading-relaxed">
 
       <Section id="sources" title="Data sources">
         {sources.length === 0 ? (
@@ -65,16 +99,20 @@ export function MethodologyPage() {
         ) : (
           <ul className="space-y-3">
             {sources.map((source) => (
-              <li key={source.slug} className="space-y-1 rounded-lg border bg-card p-4 text-sm">
-                <p className="flex flex-wrap items-center gap-2 font-medium">
+              <li key={source.slug} className="space-y-1.5 rounded-lg border bg-card p-5 text-sm">
+                <p className="flex flex-wrap items-center gap-2 font-display text-xl font-semibold">
                   {source.name}
-                  {source.is_demo && <Badge variant="outline">Demo — fictional</Badge>}
+                  {source.is_demo && (
+                    <Badge variant="outline" className="rounded-sm border-need-medium/40 bg-warning font-sans text-warning-foreground">
+                      Demo — fictional
+                    </Badge>
+                  )}
                 </p>
                 <p className="text-muted-foreground">Data as of {formatDate(source.as_of)}</p>
                 {source.licence && <p>Licence / terms: {source.licence}</p>}
                 {source.notes && <p className="text-muted-foreground">{source.notes}</p>}
                 {source.url && (
-                  <a href={source.url} className="text-primary hover:underline" rel="noreferrer" target="_blank">
+                  <a href={source.url} className="font-semibold text-primary hover:underline" rel="noreferrer" target="_blank">
                     Source website
                   </a>
                 )}
@@ -122,11 +160,14 @@ export function MethodologyPage() {
           {scoring.need_levels.high}+ are shown as a high need and {scoring.need_levels.medium}+ as a medium need.
         </p>
         <WeightList weights={scoring.need_weights} labels={NEED_LABELS} />
-        <ul className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+        <ul className="grid grid-cols-1 gap-2 text-sm min-[420px]:grid-cols-2 sm:grid-cols-3">
           {positions.map((position) => (
-            <li key={position.code} className="rounded-md border bg-card px-3 py-2">
+            <li key={position.code} className="flex items-center gap-3 rounded-md border bg-card px-3 py-2">
+              <PositionChip code={position.code} />
+              <span>
               <span className="font-medium">{position.label}</span>
               <span className="block text-xs text-muted-foreground">Typical depth {position.target_depth}</span>
+              </span>
             </li>
           ))}
         </ul>
@@ -136,18 +177,24 @@ export function MethodologyPage() {
         <p>Positions are judged on different metrics. These are the exact weights used.</p>
         <div className="grid gap-4 md:grid-cols-2">
           {roles.map((role) => (
-            <div key={role.key} className="space-y-2 rounded-lg border bg-card p-4">
-              <div>
-                <p className="font-semibold">{role.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {positions.find((p) => p.code === role.position)?.label} · {role.summary}
-                </p>
+            <div key={role.key} className="space-y-3 rounded-lg border bg-card p-4">
+              <div className="flex items-start gap-3">
+                <PositionChip code={role.position} title={positions.find((p) => p.code === role.position)?.label} />
+                <div>
+                  <p className="font-display text-xl leading-tight font-semibold">{role.name}</p>
+                  <p className="text-xs text-muted-foreground">{role.summary}</p>
+                </div>
               </div>
-              <ul className="space-y-0.5 text-sm">
+              <ul className="space-y-1.5 text-sm">
                 {role.weights.map((weight) => (
-                  <li key={weight.metric} className="flex justify-between gap-2">
-                    <span>{weight.label}</span>
-                    <span className="tabular-nums">{formatPercent(weight.weight)}</span>
+                  <li key={weight.metric} className="space-y-1">
+                    <span className="flex justify-between gap-2">
+                      <span>{weight.label}</span>
+                      <span className="font-semibold tabular-nums">{formatPercent(weight.weight)}</span>
+                    </span>
+                    <span className="block h-1 overflow-hidden rounded-full bg-muted" aria-hidden>
+                      <span className="block h-full bg-pitch" style={{ width: `${weight.weight * 100}%` }} />
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -159,13 +206,15 @@ export function MethodologyPage() {
       <Section id="glossary" title="Metric glossary">
         <dl className="divide-y rounded-lg border bg-card">
           {metrics.map((metric) => (
-            <div key={metric.key} className="grid gap-1 px-4 py-2 text-sm sm:grid-cols-[14rem_1fr]">
+            <div key={metric.key} className="grid gap-1 px-4 py-3 text-sm sm:grid-cols-[14rem_1fr]">
               <dt className="font-medium">{metric.label}</dt>
               <dd className="text-muted-foreground">{metric.description}</dd>
             </div>
           ))}
         </dl>
       </Section>
-    </article>
+        </article>
+      </PageBody>
+    </>
   )
 }

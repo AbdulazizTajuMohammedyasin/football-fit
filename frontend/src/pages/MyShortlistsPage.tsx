@@ -10,8 +10,9 @@ import {
 } from '@/api/savedShortlists'
 import type { SavedShortlist } from '@/api/types'
 import { useAuth } from '@/auth/AuthProvider'
-import { EmptyState, ErrorState, LoadingState } from '@/components/states'
-import { Badge } from '@/components/ui/badge'
+import { PageBody, PageHeader } from '@/components/page'
+import { DemoBadge, PositionChip } from '@/components/score'
+import { EmptyState, ErrorState, LoadingState, PageLoading } from '@/components/states'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,19 +28,22 @@ function ShortlistCard({ list }: { list: SavedShortlist }) {
       : null
 
   return (
-    <article className="space-y-3 rounded-lg border bg-card p-4" aria-labelledby={`list-${list.id}`}>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 id={`list-${list.id}`} className="text-lg font-semibold">
+    <article className="overflow-hidden rounded-lg border bg-card" aria-labelledby={`list-${list.id}`}>
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b p-5">
+        <div className="min-w-0 space-y-1">
+          <h2 id={`list-${list.id}`} className="font-display text-2xl leading-tight font-semibold break-words">
             {list.name}
           </h2>
-          <p className="text-sm text-muted-foreground">
-            {[list.club_name && `For ${list.club_name}`, list.role_name, `updated ${formatDate(list.updated_at.slice(0, 10))}`]
-              .filter(Boolean)
-              .join(' · ')}
+          <p className="flex flex-wrap gap-x-4 gap-y-0.5 text-sm text-muted-foreground">
+            {list.club_name && <span>For {list.club_name}</span>}
+            {list.role_name && <span>{list.role_name}</span>}
+            <span>Updated {formatDate(list.updated_at.slice(0, 10))}</span>
+            <span>
+              {list.entries.length} {list.entries.length === 1 ? 'player' : 'players'}
+            </span>
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {list.club_slug && list.role_key && list.club_name && (
             <Button asChild variant="outline" size="sm">
               <Link to={`/clubs/${list.club_slug}/shortlist?role=${list.role_key}`}>Open shortlist</Link>
@@ -64,28 +68,27 @@ function ShortlistCard({ list }: { list: SavedShortlist }) {
       </div>
 
       {list.entries.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No players yet. Use “Save” on a shortlist or player page.</p>
+        <p className="p-5 text-sm text-muted-foreground">No players yet. Use “Save” on a shortlist or player page.</p>
       ) : (
-        <ul className="divide-y rounded-md border">
+        <ul className="divide-y">
           {list.entries.map(({ player, note }) => (
-            <li key={player.slug} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+            <li key={player.slug} className="flex items-center justify-between gap-3 px-5 py-2.5 text-sm">
               {player.available ? (
-                <span>
-                  <Link to={`/players/${player.slug}`} className="font-medium hover:underline">
-                    {player.name}
-                  </Link>{' '}
-                  <span className="text-muted-foreground">
-                    {player.position} · {player.club ?? 'No club'}
+                <span className="flex min-w-0 items-center gap-3">
+                  {player.position && <PositionChip code={player.position} />}
+                  <span className="min-w-0">
+                    <span className="flex flex-wrap items-center gap-2">
+                      <Link to={`/players/${player.slug}`} className="font-semibold hover:underline">
+                        {player.name}
+                      </Link>
+                      {player.is_demo && <DemoBadge />}
+                    </span>
+                    <span className="block text-muted-foreground">{player.club ?? 'No club'}</span>
+                    {note && <span className="block text-xs text-muted-foreground">{note}</span>}
                   </span>
-                  {player.is_demo && (
-                    <Badge variant="outline" className="ml-2">
-                      Demo
-                    </Badge>
-                  )}
-                  {note && <span className="block text-xs text-muted-foreground">{note}</span>}
                 </span>
               ) : (
-                <span className="text-muted-foreground">
+                <span className="text-muted-foreground italic">
                   {player.slug} — no longer in the current data (it may have been re-imported or removed)
                 </span>
               )}
@@ -112,7 +115,7 @@ export function MyShortlistsPage() {
   const create = useCreateShortlist()
   const [name, setName] = useState('')
 
-  if (checking) return <LoadingState label="Checking your session" rows={2} />
+  if (checking) return <PageLoading label="Checking your session" />
   if (!user) return <Navigate to="/signin?next=/shortlists" replace />
 
   function submit(event: FormEvent) {
@@ -122,48 +125,53 @@ export function MyShortlistsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-3xl font-semibold tracking-tight">My shortlists</h1>
-        <p className="text-muted-foreground">Players you have saved, signed in as {user.username}.</p>
-      </header>
+    <>
+      <PageHeader
+        context={`Signed in as ${user.username}`}
+        title="My shortlists"
+        meta="Players you have saved, grouped into your own lists."
+      >
+        <form onSubmit={submit} className="flex max-w-md items-end gap-2 pt-2">
+          <div className="flex-1 space-y-1">
+            <Label htmlFor="new-shortlist" className="font-semibold">
+              New shortlist
+            </Label>
+            <Input
+              id="new-shortlist"
+              value={name}
+              maxLength={100}
+              placeholder="e.g. Left-back options"
+              onChange={(event) => setName(event.target.value)}
+            />
+          </div>
+          <Button type="submit" disabled={create.isPending || !name.trim()}>
+            Create
+          </Button>
+        </form>
+        {create.isError && (
+          <p role="alert" className="text-sm text-destructive">
+            {create.error.message}
+          </p>
+        )}
+      </PageHeader>
 
-      <form onSubmit={submit} className="flex max-w-md items-end gap-2">
-        <div className="flex-1 space-y-1">
-          <Label htmlFor="new-shortlist">New shortlist</Label>
-          <Input
-            id="new-shortlist"
-            value={name}
-            maxLength={100}
-            placeholder="e.g. Left-back options"
-            onChange={(event) => setName(event.target.value)}
-          />
-        </div>
-        <Button type="submit" disabled={create.isPending || !name.trim()}>
-          Create
-        </Button>
-      </form>
-      {create.isError && (
-        <p role="alert" className="text-sm text-destructive">
-          {create.error.message}
-        </p>
-      )}
-
-      {lists.isPending ? (
-        <LoadingState label="Loading your shortlists" rows={2} />
-      ) : lists.isError ? (
-        <ErrorState error={lists.error} onRetry={() => lists.refetch()} />
-      ) : lists.data.length === 0 ? (
-        <EmptyState title="No saved shortlists yet">
-          Build a shortlist from a club's needs, then use “Save” on any player.
-        </EmptyState>
-      ) : (
-        <div className="space-y-4">
-          {lists.data.map((list) => (
-            <ShortlistCard key={list.id} list={list} />
-          ))}
-        </div>
-      )}
-    </div>
+      <PageBody>
+        {lists.isPending ? (
+          <LoadingState label="Loading your shortlists" rows={2} />
+        ) : lists.isError ? (
+          <ErrorState error={lists.error} onRetry={() => lists.refetch()} />
+        ) : lists.data.length === 0 ? (
+          <EmptyState title="No saved shortlists yet">
+            Build a shortlist from a club's needs, then use “Save” on any player.
+          </EmptyState>
+        ) : (
+          <div className="grid gap-4 xl:grid-cols-2">
+            {lists.data.map((list) => (
+              <ShortlistCard key={list.id} list={list} />
+            ))}
+          </div>
+        )}
+      </PageBody>
+    </>
   )
 }
