@@ -42,24 +42,6 @@
   --color-input: var(--line-strong);
   --color-ring: var(--ink);
 
-  /* Earlier names still referenced by pages awaiting migration; removed in M7. */
-  --color-pitch: var(--ink);
-  --color-pitch-foreground: var(--on-ink);
-  --color-pitch-muted: var(--on-ink-2);
-  --color-floodlight: var(--signal);
-  --color-warning: var(--caution-bg);
-  --color-warning-foreground: var(--caution);
-  --color-need-high: var(--ink);
-  --color-need-high-soft: var(--tissue);
-  --color-need-medium: var(--ink);
-  --color-need-medium-soft: var(--tissue);
-  --color-need-low: var(--ink);
-  --color-need-low-soft: var(--tissue);
-  --color-series-1: var(--ink);
-  --color-series-2: var(--ink);
-  --color-series-3: var(--ink);
-  --color-series-4: var(--ink);
-
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 10px;
@@ -168,10 +150,5 @@
       var(--line) 4px,
       var(--line) 8px
     );
-  }
-  /* Kept for pages awaiting migration; the decorative arcs are gone. */
-  .pitch-band {
-    background-color: var(--ink);
-    color: var(--on-ink);
   }
 }

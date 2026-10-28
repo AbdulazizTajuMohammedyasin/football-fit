@@ -119,7 +119,7 @@ function NeedsPanel({ slug }: { slug: string }) {
   }
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10">
-      <div className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+      <div className="max-w-xl space-y-4 lg:sticky lg:top-24 lg:max-w-none lg:self-start">
         <NeedMap needs={needs.data.needs} />
         <p className="text-sm text-ink-2">
           Need scores run from 0 (no need) to 100 (urgent). Each blends quality gap, depth and ageing; missing

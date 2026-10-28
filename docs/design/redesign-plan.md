@@ -1,4 +1,4 @@
-# Football Fit UI/UX redesign plan, round 2 (waiting for approval)
+# Football Fit UI/UX redesign plan, round 2 (approved 2026-10-28; implemented, see iteration-log.md)
 
 Date: 2026-10-28. Inputs: [page-inventory.md](page-inventory.md) (Phase 1 audit and baseline) and
 [reference-research.md](reference-research.md) (Phase 2). This plan supersedes the visual direction

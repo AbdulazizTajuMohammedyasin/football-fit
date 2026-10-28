@@ -123,3 +123,24 @@ Each entry lists what the screenshots showed, what was fixed, and what was check
 - **Acceptance:** phone contents list opens; the dialog opens from Delete, Esc closes it, and focus
   returns to the Delete button with a visible ring (verified in capture, with mocked API data and no
   account created). Tests 38/38; no overflow; no console errors.
+
+## M7: regression pass (2026-10-28)
+
+- **Cleanup:** removed the temporary alias tokens (`pitch`, `floodlight`, `warning`, `need-*`,
+  `series-*`) and the old `pitch-band` class after confirming no code used them. On tablets the
+  need map is capped at `max-w-xl` (it filled 720 px at 768).
+- **Screenshot set:** 16 routes and states × 3 viewports (1440×1000, 768×1024, 390×844) = 48 full-page
+  captures in `round2/m7/`. Automated checks found 0 captures with horizontal overflow, console
+  errors, broken images, or failed requests other than the deliberate `404`s and `400`
+  (`/clubs/nope`, `?role=cb-stopper`).
+- **Keyboard:** Tab from the top reaches the skip link, wordmark, nav pills, Sign in, then the club
+  search; club rows and shortlist checkboxes show the ink outline and signal halo.
+- **Signed-in states (mocked API, no account created):** the Save popover lists the user's
+  shortlists with the saved one ticked; My shortlists and its delete dialog (M6).
+- **Checks:** `npm run typecheck` clean; `npm test` 38/38; `npm run lint` 5 warnings (the same
+  `only-export-components` warnings as before the redesign, 0 errors); `npm run build` succeeds
+  (603 kB JS, with the existing chunk-size warning); backend `pytest` 97 passed;
+  `git diff 93b1c37..HEAD -- backend` is empty.
+- **Not verified:** real sign-up, sign-in and save against the database (deliberately not done, to
+  avoid creating accounts); screen-reader output; loading states (too brief locally to capture);
+  browsers other than Chrome.
