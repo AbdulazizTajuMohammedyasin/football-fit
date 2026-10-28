@@ -13,6 +13,16 @@ import { useAuth } from '@/auth/AuthProvider'
 import { PageBody, PageHeader } from '@/components/page'
 import { DemoBadge, PositionChip } from '@/components/score'
 import { EmptyState, ErrorState, LoadingState, PageLoading } from '@/components/states'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -28,13 +38,13 @@ function ShortlistCard({ list }: { list: SavedShortlist }) {
       : null
 
   return (
-    <article className="overflow-hidden rounded-lg border bg-card" aria-labelledby={`list-${list.id}`}>
+    <article className="overflow-hidden rounded-xl border bg-paper" aria-labelledby={`list-${list.id}`}>
       <div className="flex flex-wrap items-start justify-between gap-3 border-b p-5">
         <div className="min-w-0 space-y-1">
-          <h2 id={`list-${list.id}`} className="font-display text-2xl leading-tight font-semibold break-words">
+          <h2 id={`list-${list.id}`} className="type-sub break-words">
             {list.name}
           </h2>
-          <p className="flex flex-wrap gap-x-4 gap-y-0.5 text-sm text-muted-foreground">
+          <p className="type-label flex flex-wrap gap-x-4 gap-y-0.5 text-ink-2">
             {list.club_name && <span>For {list.club_name}</span>}
             {list.role_name && <span>{list.role_name}</span>}
             <span>Updated {formatDate(list.updated_at.slice(0, 10))}</span>
@@ -54,42 +64,51 @@ function ShortlistCard({ list }: { list: SavedShortlist }) {
               <Link to={compareLink}>Compare</Link>
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={destroy.isPending}
-            onClick={() => {
-              if (window.confirm(`Delete “${list.name}”? This cannot be undone.`)) destroy.mutate(list.id)
-            }}
-          >
-            <Trash2 aria-hidden /> Delete
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="sm" disabled={destroy.isPending}>
+                <Trash2 aria-hidden /> Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogTitle>Delete “{list.name}”?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This removes the list and its {list.entries.length} saved{' '}
+                {list.entries.length === 1 ? 'player' : 'players'}. It cannot be undone.
+              </AlertDialogDescription>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Keep list</AlertDialogCancel>
+                <AlertDialogAction onClick={() => destroy.mutate(list.id)}>Delete list</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
       {list.entries.length === 0 ? (
-        <p className="p-5 text-sm text-muted-foreground">No players yet. Use “Save” on a shortlist or player page.</p>
+        <p className="p-5 text-[15px] text-ink-2">No players yet. Use “Save” on a shortlist or player page.</p>
       ) : (
         <ul className="divide-y">
           {list.entries.map(({ player, note }) => (
-            <li key={player.slug} className="flex items-center justify-between gap-3 px-5 py-2.5 text-sm">
+            <li key={player.slug} className="flex items-center justify-between gap-3 px-5 py-2.5 text-[15px]">
               {player.available ? (
                 <span className="flex min-w-0 items-center gap-3">
                   {player.position && <PositionChip code={player.position} />}
                   <span className="min-w-0">
                     <span className="flex flex-wrap items-center gap-2">
-                      <Link to={`/players/${player.slug}`} className="font-semibold hover:underline">
+                      <Link to={`/players/${player.slug}`} className="font-medium hover:underline">
                         {player.name}
                       </Link>
                       {player.is_demo && <DemoBadge />}
                     </span>
-                    <span className="block text-muted-foreground">{player.club ?? 'No club'}</span>
-                    {note && <span className="block text-xs text-muted-foreground">{note}</span>}
+                    <span className="type-label block text-ink-2">{player.club ?? 'No club'}</span>
+                    {note && <span className="block text-sm text-ink-2">{note}</span>}
                   </span>
                 </span>
               ) : (
-                <span className="text-muted-foreground italic">
-                  {player.slug} — no longer in the current data (it may have been re-imported or removed)
+                <span className="text-ink-2">
+                  No longer in the current data <span className="type-label">({player.slug})</span>. It may have
+                  been re-imported or removed.
                 </span>
               )}
               <Button
@@ -131,25 +150,26 @@ export function MyShortlistsPage() {
         title="My shortlists"
         meta="Players you have saved, grouped into your own lists."
       >
-        <form onSubmit={submit} className="flex max-w-md items-end gap-2 pt-2">
-          <div className="flex-1 space-y-1">
-            <Label htmlFor="new-shortlist" className="font-semibold">
-              New shortlist
-            </Label>
+        <form onSubmit={submit} className="max-w-md space-y-1.5 pt-2">
+          <Label htmlFor="new-shortlist" className="type-label font-normal text-ink-2">
+            New shortlist
+          </Label>
+          <div className="flex items-stretch gap-1 rounded-lg border border-line-strong bg-paper p-1 focus-within:border-ink">
             <Input
               id="new-shortlist"
+              className="border-0 bg-transparent focus-visible:shadow-none"
               value={name}
               maxLength={100}
               placeholder="e.g. Left-back options"
               onChange={(event) => setName(event.target.value)}
             />
+            <Button type="submit" disabled={create.isPending || !name.trim()} aria-busy={create.isPending}>
+              Create
+            </Button>
           </div>
-          <Button type="submit" disabled={create.isPending || !name.trim()}>
-            Create
-          </Button>
         </form>
         {create.isError && (
-          <p role="alert" className="text-sm text-destructive">
+          <p role="alert" className="text-sm text-danger">
             {create.error.message}
           </p>
         )}

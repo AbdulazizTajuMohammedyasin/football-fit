@@ -105,3 +105,21 @@ Each entry lists what the screenshots showed, what was fixed, and what was check
   - `?players=bukayo-saka,declan-rice,martin-odegaard` shows the error with the action; pressing it
     leads to `?players=bukayo-saka,declan-rice` and a working comparison (verified URL and render).
   - Tests 38/38; no overflow; no console errors (the 404 on the deliberately broken link is expected).
+
+## M6: methodology, account and saved shortlists (2026-10-28)
+
+- **Methodology:** a light header and numbered section counters (the page is a real sequence of
+  sections). Contents are sticky on desktop; on phones a collapsible "On this page" list sits at the
+  top. Role profiles are grouped by position, with weights as compact chips (23 equal cards
+  before). Real and demo sources are tagged.
+- **Sign in / sign up:** a single paper card (max 26 rem) with labelled fields. The password hint is
+  linked with `aria-describedby`, and the submit button shows `aria-busy` while waiting. Button
+  names and error alerts are unchanged (auth tests 4/4).
+- **My shortlists:** a composite "New shortlist" input with Create. Lists are cards with mono meta.
+  Deleting uses an in-app confirm dialog that names the list and its player count ("Keep list" /
+  "Delete list"), replacing `window.confirm`. Unavailable players read "No longer in the current
+  data (slug)".
+- **Iteration 1:** no P0–P2 defects found in the screenshots at 1440 or 390.
+- **Acceptance:** phone contents list opens; the dialog opens from Delete, Esc closes it, and focus
+  returns to the Delete button with a visible ring (verified in capture, with mocked API data and no
+  account created). Tests 38/38; no overflow; no console errors.
