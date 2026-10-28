@@ -21,7 +21,7 @@ export function MetricRow({
   const missing = value === null
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 sm:grid-cols-[minmax(0,14rem)_6rem_minmax(0,1fr)_3rem]">
-      <span className="text-sm font-medium">
+      <span className="text-[15px]">
         {label}
         {!higherIsBetter && <span className="ml-1 text-xs font-normal text-muted-foreground">(lower is better)</span>}
         {weight !== undefined && (
@@ -30,8 +30,8 @@ export function MetricRow({
       </span>
       <span
         className={cn(
-          'text-right font-display text-base font-semibold tabular-nums',
-          missing && 'font-sans text-xs font-normal italic text-muted-foreground',
+          'text-right tabular-nums',
+          missing && 'text-sm text-ink-2 italic',
         )}
       >
         {missing ? NOT_RECORDED : formatMetric(value, unit)}
@@ -39,9 +39,9 @@ export function MetricRow({
       <ScoreBar
         value={percentile}
         label={`${label} percentile`}
-        className="col-span-2 sm:col-span-1"
+        className="sm:col-span-1"
       />
-      <span className="hidden text-right text-xs tabular-nums text-muted-foreground sm:block">
+      <span className="type-label text-right text-ink-2">
         {percentile === null ? '–' : ordinal(Math.round(percentile))}
       </span>
     </div>

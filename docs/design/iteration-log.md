@@ -83,3 +83,25 @@ Each entry lists what the screenshots showed, what was fixed, and what was check
   - The evidence toggle opens the panel.
   - `?role=cb-stopper` shows 8 supported-role links; "Finisher" opens `?role=fw-finisher` (verified).
   - Shortlist tests 3/3 unchanged; no overflow; no console errors.
+
+## M5: player and compare (2026-10-28)
+
+- **Player:** a compact ink header (about 155 px at 1440, was about 400) with the position chip,
+  provenance, and the Compare arrow action plus Save. A paper facts strip lists only recorded facts;
+  fields the source does not record are named in one sentence ("Not recorded by this source:
+  appearances, nationality, preferred foot") instead of empty slots. Role cards mark the highest
+  role score with a signal edge and tag. "Other recorded metrics" lists only metrics not already
+  shown in a role card (for an FPL midfielder: 3 instead of 12).
+- **Compare:** players are keyed A–D (no series colours). The desktop table has a sticky metric
+  column. On phones there is one block per metric with every player listed, so there is no
+  sideways scrolling. When the comparison returns 404, each selected player is looked up through
+  the existing player endpoint; unknown ones are marked "not found" on their chip, and a "Remove
+  the unknown player" action fixes the link.
+- **Iteration 1 findings:** P2: on phones, metric rows hid the percentile rank (bar only). The
+  rank now shows at every width.
+- **Acceptance:**
+  - Player header ≤ 260 px; no metric shown twice.
+  - On phones all 3 compared players appear under each metric.
+  - `?players=bukayo-saka,declan-rice,martin-odegaard` shows the error with the action; pressing it
+    leads to `?players=bukayo-saka,declan-rice` and a working comparison (verified URL and render).
+  - Tests 38/38; no overflow; no console errors (the 404 on the deliberately broken link is expected).

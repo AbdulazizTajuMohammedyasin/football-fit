@@ -2,20 +2,23 @@ import { Plus, Search, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 
-import { useComparison, useMeta, usePlayerSearch } from '@/api/queries'
-import type { Comparison } from '@/api/types'
-import { RoleSelect } from '@/components/RoleSelect'
-import { CoverageBadge, ScoreBar } from '@/components/score'
-import { SourceLine } from '@/components/SourceLine'
+import { ApiError } from '@/api/client'
+import { useComparison, useMeta, usePlayerLookups, usePlayerSearch } from '@/api/queries'
+import type { CompareEntry, Comparison } from '@/api/types'
 import { PageBody, PageHeader } from '@/components/page'
+import { RoleSelect } from '@/components/RoleSelect'
+import { CoverageBadge, ScoreBar, Tag } from '@/components/score'
+import { SourceLine } from '@/components/SourceLine'
 import { EmptyState, ErrorState, LoadingState } from '@/components/states'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { MAX_PLAYERS, parsePlayers } from '@/lib/compareParams'
 import { formatAge, formatMetric, formatNumber, formatScore, NOT_RECORDED, ordinal } from '@/lib/format'
 import { cn } from '@/lib/utils'
+
+const LETTERS = ['A', 'B', 'C', 'D']
 
 function PlayerPicker({ selected, onAdd }: { selected: string[]; onAdd: (slug: string) => void }) {
   const [term, setTerm] = useState('')
@@ -25,15 +28,16 @@ function PlayerPicker({ selected, onAdd }: { selected: string[]; onAdd: (slug: s
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="player-search" className="font-semibold">
+      <Label htmlFor="player-search" className="text-sm font-normal">
         Add a player
       </Label>
       <div className="relative">
-        <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+        <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink-2" aria-hidden />
         <Input
           id="player-search"
-          className="h-10 pl-9"
+          className="pl-9"
           placeholder={full ? `Maximum ${MAX_PLAYERS} players` : 'Search by name (2+ letters)'}
+          autoComplete="off"
           value={term}
           disabled={full}
           onChange={(event) => setTerm(event.target.value)}
@@ -42,26 +46,26 @@ function PlayerPicker({ selected, onAdd }: { selected: string[]; onAdd: (slug: s
       {term.trim().length >= 2 && !full && (
         <div aria-live="polite">
           {search.isError ? (
-            <p className="text-sm text-destructive">Search failed: {search.error.message}</p>
+            <p className="text-sm text-danger">Search failed: {search.error.message}</p>
           ) : search.isPending ? (
-            <p className="text-sm text-muted-foreground">Searching…</p>
+            <p className="text-sm text-ink-2">Searching…</p>
           ) : results.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No players found.</p>
+            <p className="text-sm text-ink-2">No players found.</p>
           ) : (
-            <ul className="divide-y overflow-hidden rounded-md border bg-card shadow-sm">
+            <ul className="divide-y overflow-hidden rounded-lg border bg-paper">
               {results.map((player) => (
                 <li key={player.slug}>
                   <button
                     type="button"
-                    className="flex min-h-11 w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
+                    className="flex min-h-11 w-full cursor-pointer items-center justify-between gap-2 px-3 py-2 text-left hover:bg-tissue"
                     onClick={() => {
                       onAdd(player.slug)
                       setTerm('')
                     }}
                   >
-                    <span>
-                      <span className="font-medium">{player.name}</span>{' '}
-                      <span className="text-muted-foreground">
+                    <span className="min-w-0">
+                      <span className="block truncate">{player.name}</span>
+                      <span className="type-label text-ink-2">
                         {player.position} · {player.club?.name ?? 'No club'} · {formatAge(player.age)}
                       </span>
                     </span>
@@ -77,133 +81,201 @@ function PlayerPicker({ selected, onAdd }: { selected: string[]; onAdd: (slug: s
   )
 }
 
-const SERIES = [
-  { fill: 'bg-series-1', border: 'border-t-series-1' },
-  { fill: 'bg-series-2', border: 'border-t-series-2' },
-  { fill: 'bg-series-3', border: 'border-t-series-3' },
-  { fill: 'bg-series-4', border: 'border-t-series-4' },
-]
+function Letter({ index, className }: { index: number; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn('inline-grid size-6 shrink-0 place-items-center rounded-sm bg-ink font-mono text-xs text-on-ink', className)}
+    >
+      {LETTERS[index]}
+    </span>
+  )
+}
 
-function ComparisonTable({ data }: { data: Comparison }) {
+/** One comparable row: a label and, per player, a value with an optional percentile. */
+interface Row {
+  key: string
+  label: string
+  weight?: number
+  cells: { value: string | null; percentile: number | null; best: boolean }[]
+}
+
+function buildRows(data: Comparison, units: Map<string, 'per90' | 'pct'>): Row[] {
+  const entries = data.players
+  const metricRows: Row[] = data.role.weights.map((weight) => {
+    const components = entries.map((entry) => entry.role_score.components.find((c) => c.metric === weight.metric))
+    const percentiles = components
+      .map((component) => component?.percentile)
+      .filter((value): value is number => value !== null && value !== undefined)
+    // Highest percentile among players who have the metric recorded; only meaningful with 2+ values.
+    const best = percentiles.length > 1 ? Math.max(...percentiles) : null
+    return {
+      key: weight.metric,
+      label: weight.label,
+      weight: weight.weight,
+      cells: components.map((component) => {
+        const value = component?.value ?? null
+        const percentile = component?.percentile ?? null
+        return {
+          value: value === null ? null : formatMetric(value, units.get(weight.metric) ?? 'per90'),
+          percentile,
+          best: percentile !== null && best === percentile,
+        }
+      }),
+    }
+  })
+  return [
+    {
+      key: 'minutes',
+      label: 'League minutes',
+      cells: entries.map((entry) => ({
+        value: entry.player.minutes === null ? null : formatNumber(entry.player.minutes),
+        percentile: null,
+        best: false,
+      })),
+    },
+    ...metricRows,
+  ]
+}
+
+function EntryBadges({ entry }: { entry: CompareEntry }) {
+  return (
+    <div className="flex flex-wrap gap-1">
+      <CoverageBadge coverage={entry.role_score.coverage} />
+      {entry.out_of_position && <Tag>Out of position</Tag>}
+      {!entry.has_season && <Tag>No season data</Tag>}
+    </div>
+  )
+}
+
+function Cell({ cell, label }: { cell: Row['cells'][number]; label: string }) {
+  if (cell.value === null) return <span className="text-sm text-ink-2 italic">{NOT_RECORDED}</span>
+  return (
+    <div className="space-y-1.5">
+      <span className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 tabular-nums">
+        <span className="text-lg">{cell.value}</span>
+        {cell.percentile !== null && (
+          <span className="type-label text-ink-2">{ordinal(Math.round(cell.percentile))} pct.</span>
+        )}
+        {cell.best && (
+          <Tag tone="signal" className="py-0">
+            Best<span className="sr-only"> in comparison</span>
+          </Tag>
+        )}
+      </span>
+      {cell.percentile !== null && <ScoreBar value={cell.percentile} label={`${label} percentile`} />}
+    </div>
+  )
+}
+
+function ComparisonView({ data }: { data: Comparison }) {
   const meta = useMeta()
   const units = new Map((meta.data?.metrics ?? []).map((metric) => [metric.key, metric.unit]))
   const entries = data.players
-
-  // Highest percentile per metric among players who have the metric recorded.
-  const best = new Map<string, number>()
-  for (const weight of data.role.weights) {
-    const values = entries
-      .map((entry) => entry.role_score.components.find((c) => c.metric === weight.metric)?.percentile)
-      .filter((value): value is number => value !== null && value !== undefined)
-    if (values.length > 1) best.set(weight.metric, Math.max(...values))
-  }
+  const rows = buildRows(data, units)
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-card" data-scroll-x>
-      <Table className="table-fixed" style={{ minWidth: `${8 + entries.length * 10}rem` }}>
-        <TableHeader>
-          <TableRow className="hover:bg-transparent">
-            <TableHead className="sticky left-0 z-10 w-32 bg-card pl-4 align-bottom sm:w-56">Metric (weight)</TableHead>
+    <>
+      {/* Phones: one block per metric, every player listed underneath, so nothing scrolls sideways. */}
+      <div className="space-y-3 md:hidden">
+        <section className="rounded-xl border bg-paper p-4">
+          <h3 className="type-label mb-3 text-ink-2">Role score</h3>
+          <ul className="space-y-4">
             {entries.map((entry, index) => (
-              <TableHead
-                key={entry.player.slug}
-                className={cn('h-auto border-t-4 py-3 align-top whitespace-normal', SERIES[index].border)}
-              >
-                <Link
-                  to={`/players/${entry.player.slug}`}
-                  className="font-display text-lg leading-tight font-semibold text-foreground hover:underline"
-                >
-                  {entry.player.name}
-                </Link>
-                <div className="mt-0.5 text-xs font-normal text-muted-foreground">
-                  {entry.player.position}, {entry.player.club?.name ?? 'No club'}, age {formatAge(entry.player.age)}
+              <li key={entry.player.slug} className="space-y-2">
+                <div className="flex items-center gap-2.5">
+                  <Letter index={index} />
+                  <Link to={`/players/${entry.player.slug}`} className="min-w-0 flex-1 truncate hover:underline">
+                    {entry.player.name}
+                  </Link>
+                  <span className="text-2xl leading-none tabular-nums">{formatScore(entry.role_score.score)}</span>
                 </div>
-              </TableHead>
+                <ScoreBar value={entry.role_score.score} label={`${entry.player.name} role score`} />
+                <EntryBadges entry={entry} />
+              </li>
             ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow className="bg-muted/50 hover:bg-muted/50">
-            <TableCell className="sticky left-0 z-10 bg-muted pl-4 font-semibold">Role score</TableCell>
-            {entries.map((entry) => (
-              <TableCell key={entry.player.slug} className="space-y-2 py-4 whitespace-normal">
-                <span className="block font-display text-4xl leading-none font-bold tabular-nums">
-                  {formatScore(entry.role_score.score)}
-                </span>
-                <ScoreBar
-                  value={entry.role_score.score}
-                  label={`${entry.player.name} role score`}
-                />
-                <div className="flex flex-wrap gap-1">
-                  <CoverageBadge coverage={entry.role_score.coverage} />
-                  {entry.out_of_position && (
-                    <Badge variant="outline" className="rounded-sm">
-                      Out of position
-                    </Badge>
-                  )}
-                  {!entry.has_season && (
-                    <Badge variant="outline" className="rounded-sm">
-                      No season data
-                    </Badge>
-                  )}
-                </div>
-              </TableCell>
-            ))}
-          </TableRow>
-          <TableRow>
-            <TableCell className="sticky left-0 z-10 bg-card pl-4 font-medium">League minutes</TableCell>
-            {entries.map((entry) => (
-              <TableCell key={entry.player.slug} className="font-display text-lg font-semibold tabular-nums">
-                {formatNumber(entry.player.minutes)}
-              </TableCell>
-            ))}
-          </TableRow>
-          {data.role.weights.map((weight) => (
-            <TableRow key={weight.metric}>
-              <TableCell className="sticky left-0 z-10 bg-card pl-4 whitespace-normal">
-                <span className="font-medium">{weight.label}</span>{' '}
-                <span className="text-xs text-muted-foreground">({Math.round(weight.weight * 100)}%)</span>
-              </TableCell>
-              {entries.map((entry) => {
-                const component = entry.role_score.components.find((c) => c.metric === weight.metric)
-                const value = component?.value ?? null
-                const percentile = component?.percentile ?? null
-                const isBest = percentile !== null && best.get(weight.metric) === percentile
-                return (
-                  <TableCell key={entry.player.slug} className={cn('whitespace-normal', isBest && 'bg-accent')}>
-                    {value === null ? (
-                      <span className="text-xs italic text-muted-foreground">{NOT_RECORDED}</span>
-                    ) : (
-                      <div className="space-y-1.5">
-                        <span className="flex flex-wrap items-baseline gap-x-1.5 tabular-nums">
-                          <span className="font-display text-lg font-semibold">
-                            {formatMetric(value, units.get(weight.metric) ?? 'per90')}
-                          </span>
-                          {percentile !== null && (
-                            <span className="text-xs text-muted-foreground">
-                              ({ordinal(Math.round(percentile))} pct.)
-                            </span>
-                          )}
-                          {isBest && (
-                            <span className="rounded-sm bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
-                              Best<span className="sr-only"> in comparison</span>
-                            </span>
-                          )}
-                        </span>
-                        <ScoreBar
-                          value={percentile}
-                          label={`${entry.player.name} ${weight.label} percentile`}
-                        />
-                      </div>
-                    )}
-                  </TableCell>
-                )
-              })}
+          </ul>
+        </section>
+        {rows.map((row) => (
+          <section key={row.key} className="rounded-xl border bg-paper p-4">
+            <h3 className="mb-3 flex items-baseline justify-between gap-2">
+              <span>{row.label}</span>
+              {row.weight !== undefined && (
+                <span className="type-label text-ink-2">weight {Math.round(row.weight * 100)}%</span>
+              )}
+            </h3>
+            <ul className="space-y-3">
+              {row.cells.map((cell, index) => (
+                <li key={entries[index].player.slug} className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-2.5">
+                  <Letter index={index} className="mt-0.5" />
+                  <Cell cell={cell} label={`${entries[index].player.name} ${row.label}`} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-xl border bg-paper md:block" data-scroll-x>
+        <Table className="table-fixed" style={{ minWidth: `${12 + entries.length * 11}rem` }}>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="sticky left-0 z-10 w-48 bg-tissue pl-5 align-bottom lg:w-56">Metric (weight)</TableHead>
+              {entries.map((entry, index) => (
+                <TableHead key={entry.player.slug} className="h-auto py-3 align-top whitespace-normal">
+                  <span className="flex items-start gap-2.5">
+                    <Letter index={index} />
+                    <span className="min-w-0">
+                      <Link
+                        to={`/players/${entry.player.slug}`}
+                        className="block font-sans text-[15px] leading-tight text-ink hover:underline"
+                      >
+                        {entry.player.name}
+                      </Link>
+                      <span className="mt-0.5 block">
+                        {entry.player.position}, {entry.player.club?.name ?? 'No club'}, age {formatAge(entry.player.age)}
+                      </span>
+                    </span>
+                  </span>
+                </TableHead>
+              ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHeader>
+          <TableBody>
+            <TableRow className="hover:bg-transparent">
+              <TableCell className="sticky left-0 z-10 bg-paper pl-5">Role score</TableCell>
+              {entries.map((entry) => (
+                <TableCell key={entry.player.slug} className="space-y-2 py-4 whitespace-normal">
+                  <span className="block text-4xl leading-none tracking-tight tabular-nums">
+                    {formatScore(entry.role_score.score)}
+                  </span>
+                  <ScoreBar value={entry.role_score.score} label={`${entry.player.name} role score`} />
+                  <EntryBadges entry={entry} />
+                </TableCell>
+              ))}
+            </TableRow>
+            {rows.map((row) => (
+              <TableRow key={row.key}>
+                <TableCell className="sticky left-0 z-10 bg-paper pl-5 whitespace-normal">
+                  {row.label}{' '}
+                  {row.weight !== undefined && (
+                    <span className="type-label text-ink-2">({Math.round(row.weight * 100)}%)</span>
+                  )}
+                </TableCell>
+                {row.cells.map((cell, index) => (
+                  <TableCell
+                    key={entries[index].player.slug}
+                    className={cn('whitespace-normal', cell.best && 'bg-tissue/60')}
+                  >
+                    <Cell cell={cell} label={`${entries[index].player.name} ${row.label}`} />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </>
   )
 }
 
@@ -213,6 +285,13 @@ export function ComparePage() {
   const players = useMemo(() => parsePlayers(searchParams.get('players')), [searchParams])
   const roleParam = searchParams.get('role')
   const comparison = useComparison(players, roleParam)
+
+  // When the API reports an unknown player, look each one up to find which.
+  const notFound = comparison.error instanceof ApiError && comparison.error.status === 404
+  const lookups = usePlayerLookups(players, notFound)
+  const unknown = players.filter(
+    (_, index) => lookups[index]?.error instanceof ApiError && (lookups[index].error as ApiError).status === 404,
+  )
 
   function setPlayers(next: string[]) {
     const params: Record<string, string> = {}
@@ -227,12 +306,16 @@ export function ComparePage() {
     setSearchParams(params)
   }
 
-  const names = new Map((comparison.data?.players ?? []).map((entry) => [entry.player.slug, entry.player.name]))
+  const names = new Map<string, string>()
+  players.forEach((slug, index) => {
+    const name = lookups[index]?.data?.player.name
+    if (name) names.set(slug, name)
+  })
+  for (const entry of comparison.data?.players ?? []) names.set(entry.player.slug, entry.player.name)
 
   return (
     <>
       <PageHeader
-        context="Side by side on one role profile"
         title="Compare players"
         meta={
           <p className="max-w-3xl">
@@ -244,32 +327,41 @@ export function ComparePage() {
       />
 
       <PageBody className="space-y-6">
-        <div className="grid gap-5 rounded-lg border bg-card p-5 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] md:gap-8">
+        <div className="grid gap-5 rounded-xl border bg-paper p-5 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] md:gap-8">
           <div className="space-y-3">
             <PlayerPicker selected={players} onAdd={(slug) => setPlayers([...players, slug])} />
             {players.length > 0 && (
               <ul className="flex flex-wrap gap-2" aria-label="Selected players">
-                {players.map((slug, index) => (
-                  <li key={slug}>
-                    <span className="inline-flex items-center gap-2 rounded-md border bg-background py-1 pr-1 pl-2.5 text-sm font-medium">
-                      <span className={cn('size-2.5 rounded-full', SERIES[index]?.fill)} aria-hidden />
-                      {names.get(slug) ?? slug}
-                      <button
-                        type="button"
-                        className="grid size-7 place-items-center rounded-sm hover:bg-muted"
-                        onClick={() => setPlayers(players.filter((item) => item !== slug))}
-                        aria-label={`Remove ${names.get(slug) ?? slug}`}
+                {players.map((slug, index) => {
+                  const missing = unknown.includes(slug)
+                  return (
+                    <li key={slug}>
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-2 rounded-md border py-1 pr-1 pl-1.5 text-sm',
+                          missing ? 'border-caution/40 bg-caution-bg text-caution' : 'bg-bone',
+                        )}
                       >
-                        <X className="size-3.5" aria-hidden />
-                      </button>
-                    </span>
-                  </li>
-                ))}
+                        <Letter index={index} />
+                        {names.get(slug) ?? slug}
+                        {missing && <span className="type-label">not found</span>}
+                        <button
+                          type="button"
+                          className="grid size-8 cursor-pointer place-items-center rounded-sm hover:bg-tissue"
+                          onClick={() => setPlayers(players.filter((item) => item !== slug))}
+                          aria-label={`Remove ${names.get(slug) ?? slug}`}
+                        >
+                          <X className="size-3.5" aria-hidden />
+                        </button>
+                      </span>
+                    </li>
+                  )
+                })}
               </ul>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="compare-role" className="font-semibold">
+            <Label htmlFor="compare-role" className="text-sm font-normal">
               Role profile
             </Label>
             {meta.data ? (
@@ -282,11 +374,11 @@ export function ComparePage() {
                 onChange={setRole}
               />
             ) : meta.isError ? (
-              <p className="text-sm text-destructive">Could not load roles: {meta.error.message}</p>
+              <p className="text-sm text-danger">Could not load roles: {meta.error.message}</p>
             ) : (
-              <p className="text-sm text-muted-foreground">Loading roles…</p>
+              <p className="text-sm text-ink-2">Loading roles…</p>
             )}
-            {comparison.data && <p className="text-sm text-muted-foreground">{comparison.data.role.summary}</p>}
+            {comparison.data && <p className="text-sm text-ink-2">{comparison.data.role.summary}</p>}
           </div>
         </div>
 
@@ -297,14 +389,25 @@ export function ComparePage() {
         ) : comparison.isPending ? (
           <LoadingState label="Comparing players" rows={3} />
         ) : comparison.isError ? (
-          <ErrorState error={comparison.error} title="Could not compare these players" />
+          <ErrorState error={comparison.error} title="Could not compare these players">
+            {unknown.length > 0 && (
+              <div className="space-y-2 pt-1">
+                <p className="text-sm text-ink">
+                  {unknown.length === 1 ? 'One player in this link is' : `${unknown.length} players in this link are`}{' '}
+                  not in the current data. They may have been re-imported or removed.
+                </p>
+                <Button variant="outline" size="sm" onClick={() => setPlayers(players.filter((slug) => !unknown.includes(slug)))}>
+                  Remove {unknown.length === 1 ? 'the unknown player' : 'unknown players'}
+                </Button>
+              </div>
+            )}
+          </ErrorState>
         ) : (
           <div className="space-y-3">
             <SourceLine meta={comparison.data} />
-            <p className="text-xs text-muted-foreground sm:hidden">Swipe the table sideways to see every player.</p>
-            <ComparisonTable data={comparison.data} />
-            <p className="text-xs text-muted-foreground">
-              “Best” and the shaded cell mark the highest percentile among the compared players for that metric.
+            <ComparisonView data={comparison.data} />
+            <p className="text-sm text-ink-2">
+              “Best” marks the highest percentile among the compared players for that metric.
             </p>
           </div>
         )}

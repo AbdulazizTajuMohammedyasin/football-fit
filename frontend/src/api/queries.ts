@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query'
 
 import { apiGet } from './client'
 import type {
@@ -85,5 +85,20 @@ export function useComparison(players: string[], role: string | null) {
       apiGet<Comparison>('/compare/', { players: players.join(','), role }, signal),
     enabled: players.length >= 2,
     placeholderData: keepPreviousData,
+  })
+}
+
+/**
+ * Look up several players individually (existing player endpoint). Used only after a comparison
+ * fails, to tell which players in the link no longer exist.
+ */
+export function usePlayerLookups(slugs: string[], enabled: boolean) {
+  return useQueries({
+    queries: slugs.map((slug) => ({
+      queryKey: ['player', slug],
+      queryFn: ({ signal }: { signal: AbortSignal }) => apiGet<PlayerDetail>(`/players/${slug}/`, {}, signal),
+      enabled,
+      retry: false,
+    })),
   })
 }
