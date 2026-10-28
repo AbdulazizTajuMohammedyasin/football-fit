@@ -53,3 +53,33 @@ Each entry lists what the screenshots showed, what was fixed, and what was check
   `?tab=squad` is set by clicking the tab (verified URL); `#need-FW` is set by a pitch marker
   (verified URL); markers are 44 px; need level is always written as a word. No overflow at 390 or
   1440; no console errors.
+
+## M4: shortlist (2026-10-28)
+
+- **Built:** a ranked table that shares one column template between header and rows (rank, player
+  with position and club in mono, age, minutes, fit score with bar, pick, save, evidence toggle),
+  from `xl` (1280 px) up. Below that, two-line rows with 44 px compare, save and evidence targets.
+  "Why this score?" is now a per-row toggle (`aria-expanded`, `aria-controls`) that opens the
+  evidence panel. The filter rail is restyled. The compare tray is ink with a signal action. An
+  unsupported role (API `400`) drops "Try again" and lists the roles the club's data can score.
+  Filter logic, URL handling, validation and compare selection are unchanged.
+- **Iteration 1 findings:**
+  - P1: at 1440, the player column was about 200 px, so names wrapped and rows grew to about 85 px
+    (6 rows on screen).
+  - P1: at 768 the table layout was cramped.
+  - Fix: the table layout moved to `xl`; pick and save became icon/checkbox-only there, with
+    screen-reader labels that include the player's name.
+- **Iteration 2 findings:**
+  - P1: on phones the meta line truncated and hid minutes. It now wraps; rows are about 100 px.
+  - P1: on phones the compare tray's chips wrapped and overlapped "Clear". The phone tray now
+    shows the count and actions only; picked rows keep their signal edge.
+- **Iteration 3:** verified at 1440, 768 and 390.
+- **Acceptance:**
+  - 9 candidate rows visible at 1440×1000 (was 3).
+  - Phone rows about 100 px; long names that wrap reach about 125 px, slightly over the 110 px
+    target, with no information lost.
+  - Picking Haaland and Isak, then the tray's Compare, opens
+    `/compare?players=erling-haaland,alexander-isak&role=fw-finisher` (verified).
+  - The evidence toggle opens the panel.
+  - `?role=cb-stopper` shows 8 supported-role links; "Finisher" opens `?role=fw-finisher` (verified).
+  - Shortlist tests 3/3 unchanged; no overflow; no console errors.
