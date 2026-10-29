@@ -38,7 +38,7 @@ function Section({ id, title, children }: { id: string; title: string; children:
       className="scroll-mt-24 space-y-4 border-t pt-10 first:border-0 first:pt-0"
     >
       <div className="space-y-2">
-        <span className="type-label inline-block rounded-full border px-2.5 py-0.5 text-ink-2">
+        <span className="type-label inline-block rounded-full border border-signal/40 bg-signal/10 px-2.5 py-0.5 text-signal">
           {String(number).padStart(2, '0')}
         </span>
         <h2 id={`${id}-heading`} className="type-section">
@@ -56,9 +56,9 @@ function WeightList({ weights, labels }: { weights: Record<string, number>; labe
       {Object.entries(weights).map(([key, weight]) => (
         <li key={key} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 px-4 py-3 text-[15px]">
           <span>{labels[key] ?? key}</span>
-          <span className="text-2xl tracking-tight tabular-nums">{formatPercent(weight)}</span>
+          <span className="num text-3xl text-signal">{formatPercent(weight)}</span>
           <span className="col-span-2 block h-1 overflow-hidden rounded-full bg-tissue" aria-hidden>
-            <span className="block h-full bg-ink" style={{ width: `${weight * 100}%` }} />
+            <span className="block h-full bg-signal" style={{ width: `${weight * 100}%` }} />
           </span>
         </li>
       ))}

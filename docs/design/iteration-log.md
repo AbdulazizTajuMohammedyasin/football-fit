@@ -144,3 +144,14 @@ Each entry lists what the screenshots showed, what was fixed, and what was check
 - **Not verified:** real sign-up, sign-in and save against the database (deliberately not done, to
   avoid creating accounts); screen-reader output; loading states (too brief locally to capture);
   browsers other than Chrome.
+
+## Round 3: "Matchday dark" (2026-10-29)
+
+Feedback: the round-two look was too close to the original ("nothing changed"). Direction chosen: matchday dark.
+
+- Theme flipped to deep navy (`--bone #05080f`, surfaces `#0b1220`) with light text; `--line-strong #56698a` keeps 3:1 on surfaces.
+- Accents: lime `--signal` for actions, selection and top scores; cyan for good scores and position chips; hot coral / amber / cyan for high / medium / low need. Need words are still printed beside every colour.
+- Display type: Barlow Condensed, uppercase, for headlines, section titles and scoreboard numerals (`.num`, `.glow`).
+- Every page header, the footer and loading bands use the `.stadium` surface (floodlight gradients plus mowing stripes). The need map is a floodlit green pitch.
+- No data, API, routing or logic changes. `scoreTone` returns colour bands now; its test was updated to match.
+- Checked at 1440 and 390 on home, club, shortlist, player, compare, methodology, sign-in and 404: no overflow, console errors or failed requests. Screenshots: `football-fit-screenshots/round3/v1/` (outside the repo).

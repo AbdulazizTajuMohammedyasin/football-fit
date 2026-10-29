@@ -33,10 +33,10 @@ describe('format helpers', () => {
 })
 
 describe('scoreTone and withArticle', () => {
-  it('maps scores to ink intensity bands', () => {
-    expect(scoreTone(90)).toBe('bg-ink')
-    expect(scoreTone(60)).toBe('bg-ink/75')
-    expect(scoreTone(0)).toBe('bg-ink/30')
+  it('maps scores to matchday colour bands', () => {
+    expect(scoreTone(90)).toBe('bg-signal')
+    expect(scoreTone(60)).toBe('bg-cyan')
+    expect(scoreTone(0)).toBe('bg-ink-2/50')
     expect(scoreTone(null)).toBe('bg-ink-2/30')
   })
 

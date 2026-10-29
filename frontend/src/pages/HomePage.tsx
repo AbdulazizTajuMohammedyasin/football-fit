@@ -15,27 +15,44 @@ import { cn } from '@/lib/utils'
 
 const STEPS = ['Choose a club', 'Read its needs', 'Open a role shortlist', 'Compare candidates'] as const
 
+/** Decorative pitch markings behind the hero; carries no data. */
+function PitchLines({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 105 68" className={className} fill="none" stroke="currentColor" strokeWidth="0.25" aria-hidden>
+      <rect x="0.5" y="0.5" width="104" height="67" />
+      <line x1="52.5" y1="0.5" x2="52.5" y2="67.5" />
+      <circle cx="52.5" cy="34" r="9.15" />
+      <circle cx="52.5" cy="34" r="0.6" fill="currentColor" />
+      <rect x="88" y="13.85" width="16.5" height="40.3" />
+      <rect x="99" y="24.85" width="5.5" height="18.3" />
+      <rect x="0.5" y="13.85" width="16.5" height="40.3" />
+      <rect x="0.5" y="24.85" width="5.5" height="18.3" />
+      <path d="M88 26.7a9.15 9.15 0 0 0 0 14.6M17 26.7a9.15 9.15 0 0 1 0 14.6" />
+    </svg>
+  )
+}
+
 /** Provenance from the API only: each source, whether it is real, and its date. */
 function ProvenanceStrip({ clubCount, className }: { clubCount?: number; className?: string }) {
   const meta = useMeta()
   if (!meta.data?.sources.length) return null
   return (
-    <section aria-label="Data loaded" className={cn('bg-ink text-on-ink', className)}>
+    <section aria-label="Data loaded" className={cn('border-b bg-paper/70', className)}>
       <Container className="type-label flex flex-wrap items-center gap-x-8 gap-y-3 py-4">
         {meta.data.sources.map((source) => (
           <span key={source.slug} className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
             <span
               aria-hidden
-              className={cn('size-1.5 rounded-full', source.is_demo ? 'bg-caution-bg' : 'bg-signal')}
+              className={cn('size-2 rounded-full', source.is_demo ? 'bg-caution' : 'bg-signal shadow-[0_0_8px_var(--signal)]')}
             />
             <span>{source.name}</span>
-            <span className="text-on-ink-2">
+            <span className="text-ink-2">
               {source.is_demo ? 'fictional' : 'real'}, as of {formatDate(source.as_of)}
             </span>
           </span>
         ))}
-        {clubCount !== undefined && <span className="text-on-ink-2">{clubCount} clubs loaded</span>}
-        <Link to="/methodology#sources" className="underline underline-offset-4 hover:text-on-ink-2 sm:ml-auto">
+        {clubCount !== undefined && <span className="text-ink-2">{clubCount} clubs loaded</span>}
+        <Link to="/methodology#sources" className="text-signal underline underline-offset-4 hover:no-underline sm:ml-auto">
           Licences and limits
         </Link>
       </Container>
@@ -48,9 +65,13 @@ function ClubRow({ club }: { club: ClubListItem }) {
   return (
     <Link
       to={`/clubs/${club.slug}`}
-      className="group flex h-full min-h-14 items-center gap-3 rounded-lg border bg-paper px-4 py-2.5 transition-colors hover:border-ink"
+      className="group flex h-full min-h-16 items-center gap-3 rounded-lg border bg-paper/80 px-4 py-3 transition-[border-color,background-color,box-shadow] hover:border-signal/60 hover:bg-tissue hover:shadow-[0_0_32px_-12px_var(--signal)]"
     >
-      {code && <span className="w-9 shrink-0 font-mono text-[13px] text-ink-2 group-hover:text-ink">{code}</span>}
+      {code && (
+        <span className="font-display w-11 shrink-0 text-2xl font-bold text-ink-2 uppercase group-hover:text-signal">
+          {code}
+        </span>
+      )}
       <span className="min-w-0 flex-1">
         <span className="block truncate font-medium">{club.name}</span>
         <span className="flex flex-wrap items-center gap-2 text-sm text-ink-2">
@@ -59,7 +80,7 @@ function ClubRow({ club }: { club: ClubListItem }) {
         </span>
       </span>
       <ArrowRight
-        className="size-4 shrink-0 text-ink-2 transition-transform group-hover:translate-x-0.5 group-hover:text-ink"
+        className="size-4 shrink-0 text-ink-2 transition-transform group-hover:translate-x-0.5 group-hover:text-signal"
         aria-hidden
       />
     </Link>
@@ -94,10 +115,14 @@ export function HomePage() {
 
   return (
     <>
-      <section className="border-b">
-        <Container className="grid gap-8 py-8 sm:py-12 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:items-end lg:gap-16 lg:py-14">
-          <div className="space-y-4">
-            <h1 className="type-hero">What does your club need?</h1>
+      <section className="stadium relative overflow-hidden">
+        <PitchLines className="pointer-events-none absolute top-1/2 -right-40 hidden h-[135%] -translate-y-1/2 text-white/[0.09] lg:block" />
+        <Container className="relative grid gap-8 py-10 sm:py-16 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-end lg:gap-16 lg:py-24">
+          <div className="space-y-5">
+            <p className="type-label text-signal uppercase">Squad needs · Role shortlists · Evidence</p>
+            <h1 className="type-hero">
+              What does your club <span className="glow">need?</span>
+            </h1>
             <p className="max-w-xl text-lg text-ink-2">
               Read a Premier League squad position by position, then rank players who fit a role, with every
               score explained.
@@ -107,7 +132,7 @@ export function HomePage() {
             <Label htmlFor="club-search" className="type-label text-ink-2">
               Filter clubs
             </Label>
-            <div className="flex items-stretch gap-1 rounded-lg border border-line-strong bg-paper p-1 focus-within:border-ink">
+            <div className="flex items-stretch gap-1 rounded-lg border border-line-strong bg-bone/80 p-1 backdrop-blur focus-within:border-signal">
               <div className="relative flex-1">
                 <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink-2" aria-hidden />
                 <Input
@@ -131,10 +156,12 @@ export function HomePage() {
                   : 'Type to narrow the list below.'}
             </p>
           </form>
-          <ol className="type-label hidden flex-wrap gap-x-6 gap-y-2 text-ink-2 sm:flex lg:col-span-2">
+          <ol className="type-label hidden flex-wrap gap-2 text-ink-2 sm:flex lg:col-span-2">
             {STEPS.map((step, index) => (
-              <li key={step} className="flex items-center gap-2">
-                <span className="text-ink">{String(index + 1).padStart(2, '0')}</span>
+              <li key={step} className="flex items-center gap-2 rounded-full border bg-bone/60 py-1.5 pr-3.5 pl-1.5">
+                <span className="grid size-6 place-items-center rounded-full bg-signal/15 text-signal">
+                  {index + 1}
+                </span>
                 {step}
               </li>
             ))}
@@ -165,7 +192,7 @@ export function HomePage() {
               {groups.map(([sourceName, group]) => (
                 <section key={sourceName} aria-label={sourceName} className="space-y-3">
                   <h3 className="flex flex-wrap items-baseline gap-x-3 gap-y-1.5 border-b pb-3">
-                    <span className="type-sub">{group[0].competition}</span>
+                    <span className="type-section">{group[0].competition}</span>
                     {group[0].is_demo ? (
                       <Tag tone="caution">Fictional demo data</Tag>
                     ) : (

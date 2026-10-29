@@ -21,7 +21,7 @@ export function LoadingState({ label = 'Loading', rows = 4 }: { label?: string; 
 export function PageLoading({ label, band = false }: { label: string; band?: boolean }) {
   return (
     <div>
-      <div className={cn(band ? 'bg-ink' : 'border-b bg-bone')}>
+      <div className="stadium">
         <Container className="space-y-3 py-8">
           <Skeleton className={cn('h-4 w-32', band ? 'bg-white/10' : 'bg-tissue')} />
           <Skeleton className={cn('h-12 w-72 max-w-full', band ? 'bg-white/10' : 'bg-tissue')} />

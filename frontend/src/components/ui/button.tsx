@@ -9,8 +9,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-ink text-on-ink hover:bg-ink/88",
-        signal: "bg-signal text-ink hover:bg-signal/80",
-        destructive: "bg-danger text-white hover:bg-danger/90",
+        signal: "bg-signal text-on-ink shadow-[0_0_24px_-8px_var(--signal)] hover:bg-signal/85",
+        destructive: "bg-danger text-on-ink hover:bg-danger/90",
         outline: "border border-line-strong bg-paper text-ink hover:bg-tissue",
         secondary: "bg-tissue text-ink hover:bg-line",
         ghost: "text-ink hover:bg-tissue",

@@ -5,6 +5,9 @@ import { formatPercent, formatScore, scoreTone } from '@/lib/format'
 import { NEED_SEGMENTS, needLabel } from '@/lib/need'
 import { cn } from '@/lib/utils'
 
+/** Fill colour per need level: hot for urgent, amber for medium, cyan for low. */
+const NEED_COLOUR: Record<string, string> = { high: 'bg-hot', medium: 'bg-amber', low: 'bg-cyan' }
+
 /** Horizontal 0–100 bar with an accessible label. Null renders as an empty, hatched track. */
 export function ScoreBar({
   value,
@@ -24,7 +27,7 @@ export function ScoreBar({
       aria-valuemax={100}
       aria-valuenow={missing ? undefined : value}
       aria-valuetext={missing ? 'Not available' : `${formatScore(value)} out of 100`}
-      className={cn('h-1 w-full overflow-hidden rounded-full bg-tissue', missing && 'hatched h-1.5', className)}
+      className={cn('h-1.5 w-full overflow-hidden rounded-full bg-tissue', missing && 'hatched', className)}
     >
       {!missing && (
         <div
@@ -42,7 +45,7 @@ export function PositionChip({ code, title, className }: { code: string; title?:
     <span
       title={title}
       className={cn(
-        'inline-grid h-6 min-w-8 place-items-center rounded-sm border border-ink/25 px-1.5 font-mono text-xs text-ink',
+        'inline-grid h-6 min-w-8 place-items-center rounded-sm border border-cyan/40 bg-cyan/10 px-1.5 font-mono text-xs text-cyan',
         className,
       )}
     >
@@ -70,13 +73,14 @@ export function Tag({
       className={cn(
         tone === 'caution' && 'border-caution/30 bg-caution-bg text-caution',
         tone === 'neutral' && 'text-ink-2',
+        tone === 'signal' && 'border-signal/30 bg-signal/10 text-signal',
         className,
       )}
     >
       {tone !== 'neutral' && (
         <span
           aria-hidden
-          className={cn('size-1.5 rounded-full', tone === 'caution' ? 'bg-caution' : 'bg-signal ring-1 ring-ink/30')}
+          className={cn('size-1.5 rounded-full', tone === 'caution' ? 'bg-caution' : 'bg-signal shadow-[0_0_8px_var(--signal)]')}
         />
       )}
       {children}
@@ -94,7 +98,7 @@ export function CoverageBadge({ coverage, threshold = 0.7 }: { coverage: number;
   )
 }
 
-/** Three-segment meter plus the level word. Ink only: the word carries the meaning, not a colour. */
+/** Three-segment meter plus the level word. Colour reinforces the level; the word carries the meaning. */
 export function NeedMeter({
   level,
   className,
@@ -105,8 +109,8 @@ export function NeedMeter({
   onDark?: boolean
 }) {
   const filled = NEED_SEGMENTS[level] ?? 0
-  const on = onDark ? 'bg-on-ink' : 'bg-ink'
-  const off = onDark ? 'bg-line-on-ink' : 'bg-line'
+  const on = NEED_COLOUR[level] ?? 'bg-ink-2'
+  const off = onDark ? 'bg-line-strong/50' : 'bg-line'
   return (
     <span className={cn('inline-flex items-center gap-2 text-sm', className)}>
       <span aria-hidden className="inline-flex gap-0.5">

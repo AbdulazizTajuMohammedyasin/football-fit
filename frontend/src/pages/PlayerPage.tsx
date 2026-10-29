@@ -34,7 +34,7 @@ function RoleScoreCard({
         {score.score === null ? (
           <span className="max-w-24 text-right text-sm text-ink-2">Not enough data to score</span>
         ) : (
-          <span className="text-5xl leading-none tracking-tight tabular-nums">{formatScore(score.score)}</span>
+          <span className={cn('num text-6xl leading-none', (score.score ?? 0) >= 75 && 'glow')}>{formatScore(score.score)}</span>
         )}
       </div>
       <ScoreBar value={score.score} label={`${score.role_name} role score`} />
@@ -95,10 +95,10 @@ export function PlayerPage() {
         back={info.club ? { to: `/clubs/${info.club.slug}?tab=squad`, label: `${info.club.name} squad` } : undefined}
         context={
           <span className="flex flex-wrap items-center gap-2">
-            <PositionChip code={info.position} className="border-on-ink-2/50 text-on-ink" />
+            <PositionChip code={info.position} />
             <span>{info.position_label}</span>
             {info.secondary_positions?.map((position) => (
-              <span key={position} className="text-on-ink-2">
+              <span key={position} className="text-ink-2">
                 also {position}
               </span>
             ))}
@@ -106,28 +106,28 @@ export function PlayerPage() {
           </span>
         }
         title={info.name}
-        meta={<SourceLine meta={data} className="text-on-ink-2" />}
+        meta={<SourceLine meta={data} className="text-ink-2" />}
         aside={
           <div className="flex flex-wrap items-center gap-2">
-            <ArrowLink to={`/compare?players=${info.slug}`} onDark>
+            <ArrowLink to={`/compare?players=${info.slug}`}>
               Compare with other players
             </ArrowLink>
             <SaveToShortlist
               playerSlug={info.slug}
               playerName={info.name}
-              className="h-10 border border-line-on-ink text-on-ink hover:bg-white/10 hover:text-on-ink"
+              className="h-11 border border-line-strong bg-bone/60 text-ink hover:bg-tissue hover:text-ink"
             />
           </div>
         }
       />
 
-      <div className="border-b bg-paper">
+      <div className="border-b bg-paper/80">
         <Container className="py-4">
           <dl className="flex flex-wrap gap-x-10 gap-y-3">
             {recorded.map(([label, value]) => (
               <div key={label}>
                 <dt className="type-label text-ink-2">{label}</dt>
-                <dd className="text-lg tabular-nums">{value}</dd>
+                <dd className="num text-2xl">{value}</dd>
               </div>
             ))}
           </dl>

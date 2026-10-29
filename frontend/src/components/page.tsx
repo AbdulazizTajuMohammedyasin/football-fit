@@ -14,8 +14,7 @@ export function PageBody({ className, children }: { className?: string; children
 }
 
 /**
- * Page title block. Light by default; `band` renders the compact green-ink band used for the
- * identity of a club or player.
+ * Page title block on the floodlit stadium band; `band` adds room for the identity of a club or player.
  */
 export function PageHeader({
   title,
@@ -40,14 +39,14 @@ export function PageHeader({
   children?: ReactNode
 }) {
   return (
-    <header className={cn(band ? 'bg-ink text-on-ink' : 'border-b bg-bone')}>
-      <Container className="py-6 sm:py-8">
+    <header className="stadium">
+      <Container className={band ? 'py-8 sm:py-12' : 'py-8 sm:py-10'}>
         {back && (
           <Link
             to={back.to}
             className={cn(
               'mb-5 inline-flex items-center gap-1.5 rounded-sm text-sm hover:underline',
-              band ? 'text-on-ink-2 hover:text-on-ink' : 'text-ink-2 hover:text-ink',
+              'text-ink-2 hover:text-ink',
             )}
           >
             <ArrowLeft className="size-4" aria-hidden />
@@ -56,9 +55,9 @@ export function PageHeader({
         )}
         <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
           <div className="min-w-0 max-w-3xl space-y-3">
-            {context && <div className={cn('type-label', band ? 'text-on-ink-2' : 'text-ink-2')}>{context}</div>}
+            {context && <div className="type-label text-ink-2">{context}</div>}
             <h1 className="type-title break-words">{title}</h1>
-            {meta && <div className={cn('text-[15px]', band ? 'text-on-ink-2' : 'text-ink-2')}>{meta}</div>}
+            {meta && <div className="text-[15px] text-ink-2">{meta}</div>}
             {children}
           </div>
           {aside}
@@ -96,14 +95,13 @@ export function SectionHeading({
 }
 
 /**
- * The forward action: a dark mono-label button joined to a signal arrow square. Use once per
- * context, for the step that moves the user along the journey.
+ * The forward action: a glowing lime button with an arrow. Use once per context, for the step
+ * that moves the user along the journey. `onDark` is accepted for callers; it reads on any surface.
  */
 export function ArrowLink({
   to,
   children,
   className,
-  onDark = false,
 }: {
   to: string
   children: ReactNode
@@ -111,16 +109,15 @@ export function ArrowLink({
   onDark?: boolean
 }) {
   return (
-    <Link to={to} className={cn('group inline-flex items-stretch gap-1 rounded-md', className)}>
-      <span
-        className={cn(
-          'inline-flex h-10 items-center rounded-md px-4 font-mono text-[13px] tracking-tight transition-colors',
-          onDark ? 'bg-paper text-ink group-hover:bg-tissue' : 'bg-ink text-on-ink group-hover:bg-ink/88',
-        )}
-      >
-        {children}
-      </span>
-      <span className="grid size-10 place-items-center rounded-md bg-signal text-ink transition-colors group-hover:bg-signal/80">
+    <Link
+      to={to}
+      className={cn(
+        'group inline-flex h-11 items-center gap-3 rounded-md bg-signal pr-1.5 pl-4 font-mono text-[13px] font-medium tracking-wide text-on-ink uppercase shadow-[0_0_28px_-8px_var(--signal)] transition-shadow hover:shadow-[0_0_36px_-4px_var(--signal)]',
+        className,
+      )}
+    >
+      {children}
+      <span className="grid size-8 place-items-center rounded-sm bg-on-ink text-signal">
         <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
       </span>
     </Link>

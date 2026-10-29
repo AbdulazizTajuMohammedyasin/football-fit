@@ -33,15 +33,15 @@ export function formatDate(iso: string): string {
 }
 
 /**
- * Tailwind fill class for a 0–100 value: more ink means a bigger value. The same scale serves
+ * Tailwind fill class for a 0–100 value: lime for strong, cyan for good, slate below. The same scale serves
  * fit, role and need scores, and the number is always printed beside it.
  */
 export function scoreTone(score: number | null | undefined): string {
   if (score === null || score === undefined) return 'bg-ink-2/30'
-  if (score >= 75) return 'bg-ink'
-  if (score >= 55) return 'bg-ink/75'
-  if (score >= 35) return 'bg-ink/50'
-  return 'bg-ink/30'
+  if (score >= 75) return 'bg-signal'
+  if (score >= 55) return 'bg-cyan'
+  if (score >= 35) return 'bg-ink-2'
+  return 'bg-ink-2/50'
 }
 
 export function ordinal(n: number): string {

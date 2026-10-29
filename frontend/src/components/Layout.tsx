@@ -50,12 +50,12 @@ function Wordmark() {
   return (
     <Link to="/" className="flex items-center gap-2.5 rounded-md" aria-label="Football Fit home">
       <svg viewBox="0 0 32 32" className="size-8 shrink-0" aria-hidden>
-        <rect width="32" height="32" rx="7" className="fill-ink" />
+        <rect width="32" height="32" rx="7" className="fill-signal" />
         <rect x="6" y="8" width="20" height="16" rx="1.5" fill="none" className="stroke-on-ink" strokeWidth="1.5" />
         <line x1="16" y1="8" x2="16" y2="24" className="stroke-on-ink" strokeWidth="1.5" />
-        <circle cx="16" cy="16" r="3" className="fill-signal" />
+        <circle cx="16" cy="16" r="3" className="fill-on-ink" />
       </svg>
-      <span className="text-xl tracking-tight">Football Fit</span>
+      <span className="font-display text-2xl font-bold tracking-wide uppercase">Football Fit</span>
     </Link>
   )
 }
@@ -63,7 +63,7 @@ function Wordmark() {
 const pillClass = ({ isActive }: { isActive: boolean }) =>
   cn(
     'block rounded-full px-3.5 py-1.5 font-mono text-[13px] transition-colors',
-    isActive ? 'bg-ink text-on-ink' : 'text-ink-2 hover:bg-tissue hover:text-ink',
+    isActive ? 'bg-signal text-on-ink' : 'text-ink-2 hover:bg-tissue hover:text-ink',
   )
 
 const sheetClass = ({ isActive }: { isActive: boolean }) =>
@@ -92,7 +92,7 @@ export function Layout() {
       >
         Skip to content
       </a>
-      <header className="sticky top-0 z-40 border-b bg-bone">
+      <header className="sticky top-0 z-40 border-b bg-bone/85 backdrop-blur-md">
         <Container className="flex h-16 items-center justify-between gap-4">
           <Wordmark />
           <nav aria-label="Main" className="hidden items-center gap-3 md:flex">
@@ -166,19 +166,19 @@ export function Layout() {
       <main id="main" className="flex-1">
         <Outlet />
       </main>
-      <footer className="mt-16 bg-ink text-on-ink">
+      <footer className="stadium mt-16 border-t">
         <Container className="grid gap-8 py-10 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
           <div className="space-y-3">
-            <p className="text-xl tracking-tight">Football Fit</p>
-            <p className="max-w-md text-[15px] text-on-ink-2">
+            <p className="font-display text-3xl font-bold uppercase">Football Fit</p>
+            <p className="max-w-md text-[15px] text-ink-2">
               Fit scores are transparent ranking aids built from recorded statistics, not predictions of transfer
               success.
             </p>
           </div>
-          <ul className="type-label flex flex-wrap gap-x-6 gap-y-2 text-on-ink-2">
+          <ul className="type-label flex flex-wrap gap-x-6 gap-y-2 text-ink-2">
             {NAV.map((item) => (
               <li key={item.to}>
-                <Link to={item.to} className="hover:text-on-ink hover:underline">
+                <Link to={item.to} className="hover:text-signal hover:underline">
                   {item.label}
                 </Link>
               </li>

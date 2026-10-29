@@ -15,6 +15,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatAge, formatNumber, formatScore, withArticle } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
+/** Score numeral colour per need level, matching the need meter. */
+const NEED_TEXT: Record<string, string> = { high: 'text-hot', medium: 'text-amber', low: 'text-cyan' }
+
 /** The component contributing most to a need score (value × weight), named for a one-line summary. */
 function biggestFactor(need: PositionNeed) {
   const scored = need.components.filter((component) => component.value !== null)
@@ -42,7 +45,7 @@ function NeedRow({ need, clubSlug, top }: { need: PositionNeed; clubSlug: string
             <NeedMeter level={need.level} />
           </div>
           <p className="shrink-0 text-right">
-            <span className="block text-4xl leading-none tracking-tight tabular-nums">{formatScore(need.score)}</span>
+            <span className={cn('num block text-6xl leading-none', NEED_TEXT[need.level])}>{formatScore(need.score)}</span>
             <span className="type-label text-ink-2">need, 0–100</span>
           </p>
         </div>
@@ -58,7 +61,7 @@ function NeedRow({ need, clubSlug, top }: { need: PositionNeed; clubSlug: string
           )}
         </p>
 
-        <details className="group rounded-lg border bg-bone/60">
+        <details className="group rounded-lg border bg-bone/50">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-2.5 text-sm text-ink [&::-webkit-details-marker]:hidden">
             Evidence and components
             <ChevronDown className="size-4 text-ink-2 transition-transform group-open:rotate-180" aria-hidden />
@@ -145,7 +148,7 @@ function BestRole({ player }: { player: SquadPlayer }) {
   if (!player.best_role) return <span className="text-sm text-ink-2">Not enough data to score</span>
   return (
     <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-      <span className="w-10 tabular-nums">{formatScore(player.best_role.score)}</span>
+      <span className="num w-10 text-xl">{formatScore(player.best_role.score)}</span>
       <ScoreBar
         value={player.best_role.score}
         label={`${player.name} ${player.best_role.name} score`}
@@ -178,7 +181,7 @@ function SquadTable({ squad }: { squad: SquadPlayer[] }) {
             onClick={() => setPosition(code)}
             className={cn(
               'h-9 min-w-11 cursor-pointer rounded-full px-3.5 font-mono text-[13px] transition-colors',
-              position === code ? 'bg-ink text-on-ink' : 'text-ink-2 hover:bg-tissue hover:text-ink',
+              position === code ? 'bg-signal text-on-ink' : 'text-ink-2 hover:bg-tissue hover:text-ink',
             )}
           >
             {code === 'all' ? `All ${squad.length}` : code}
@@ -201,7 +204,7 @@ function SquadTable({ squad }: { squad: SquadPlayer[] }) {
             </div>
             {player.best_role ? (
               <span className="text-right">
-                <span className="block text-xl leading-none tabular-nums">{formatScore(player.best_role.score)}</span>
+                <span className="num block text-2xl leading-none">{formatScore(player.best_role.score)}</span>
                 {player.best_role.coverage < 0.7 && <span className="text-xs text-caution">Incomplete data</span>}
               </span>
             ) : (
@@ -277,7 +280,7 @@ export function ClubPage() {
           </span>
         }
         title={data.club.name}
-        meta={<SourceLine meta={data} className="text-on-ink-2" />}
+        meta={<SourceLine meta={data} className="text-ink-2" />}
       />
 
       <Container className="py-6 sm:py-8">
@@ -290,7 +293,7 @@ export function ClubPage() {
               <TabsTrigger
                 key={item.key}
                 value={item.key}
-                className="h-10 flex-none cursor-pointer rounded-full px-4 text-[15px] font-normal text-ink-2 hover:bg-tissue hover:text-ink data-[state=active]:bg-ink data-[state=active]:text-on-ink data-[state=active]:shadow-none"
+                className="h-10 flex-none cursor-pointer rounded-full px-4 text-[15px] font-normal text-ink-2 hover:bg-tissue hover:text-ink data-[state=active]:bg-signal data-[state=active]:text-on-ink data-[state=active]:shadow-none"
               >
                 {item.label}
               </TabsTrigger>

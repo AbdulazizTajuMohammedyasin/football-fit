@@ -25,13 +25,13 @@ const SPOTS: Record<string, [number, number]> = {
 const LEGEND = ['high', 'medium', 'low', 'unknown'] as const
 
 const MARKER: Record<string, string> = {
-  high: 'bg-ink text-on-ink border-ink',
-  medium: 'bg-paper text-ink border-ink border-2',
-  low: 'bg-paper text-ink-2 border-line-strong',
+  high: 'bg-hot text-on-ink border-hot shadow-[0_0_24px_-2px_var(--hot)]',
+  medium: 'bg-amber text-on-ink border-amber shadow-[0_0_18px_-4px_var(--amber)]',
+  low: 'bg-bone/70 text-cyan border-cyan border-2',
   unknown: 'hatched text-ink-2 border-line-strong',
 }
 
-/** A top-down pitch with one marker per position; marker weight and the legend words show need. */
+/** A floodlit top-down pitch with one marker per position; marker colour and the legend words show need. */
 export function NeedMap({ needs, className }: { needs: PositionNeed[]; className?: string }) {
   let fallback = 0
   const placed = needs.map((need) => {
@@ -41,12 +41,12 @@ export function NeedMap({ needs, className }: { needs: PositionNeed[]; className
 
   return (
     <figure className={cn('w-full', className)} aria-labelledby="need-map-caption">
-      <div className="relative overflow-hidden rounded-xl border bg-paper">
+      <div className="relative overflow-hidden rounded-xl border border-[#1c4a33] bg-[#0a2a1c]">
         <svg viewBox="0 0 105 68" className="block h-auto w-full" aria-hidden>
           {Array.from({ length: 7 }, (_, i) => (
-            <rect key={i} x={i * 15} y="0" width="7.5" height="68" className="fill-tissue/40" />
+            <rect key={i} x={i * 15} y="0" width="7.5" height="68" fill="#0d3323" />
           ))}
-          <g fill="none" className="stroke-line-strong/60" strokeWidth="0.3">
+          <g fill="none" stroke="rgb(255 255 255 / 0.32)" strokeWidth="0.3">
             <rect x="0.5" y="0.5" width="104" height="67" />
             <line x1="52.5" y1="0.5" x2="52.5" y2="67.5" />
             <circle cx="52.5" cy="34" r="9.15" />
@@ -66,13 +66,13 @@ export function NeedMap({ needs, className }: { needs: PositionNeed[]; className
           >
             <span
               className={cn(
-                'grid size-11 place-items-center rounded-full border font-mono text-xs transition-transform group-hover:scale-105',
+                'grid size-11 place-items-center rounded-full border font-mono text-xs font-medium transition-transform group-hover:scale-110',
                 MARKER[need.level] ?? MARKER.unknown,
               )}
             >
               {need.position}
             </span>
-            <span className="rounded-sm bg-paper/90 px-1 text-xs tabular-nums text-ink">{formatScore(need.score)}</span>
+            <span className="num rounded-sm bg-bone/85 px-1.5 text-sm text-ink">{formatScore(need.score)}</span>
           </a>
         ))}
       </div>

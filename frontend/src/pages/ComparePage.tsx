@@ -85,7 +85,7 @@ function Letter({ index, className }: { index: number; className?: string }) {
   return (
     <span
       aria-hidden
-      className={cn('inline-grid size-6 shrink-0 place-items-center rounded-sm bg-ink font-mono text-xs text-on-ink', className)}
+      className={cn('inline-grid size-6 shrink-0 place-items-center rounded-sm bg-cyan font-mono text-xs font-medium text-on-ink', className)}
     >
       {LETTERS[index]}
     </span>
@@ -188,7 +188,7 @@ function ComparisonView({ data }: { data: Comparison }) {
                   <Link to={`/players/${entry.player.slug}`} className="min-w-0 flex-1 truncate hover:underline">
                     {entry.player.name}
                   </Link>
-                  <span className="text-2xl leading-none tabular-nums">{formatScore(entry.role_score.score)}</span>
+                  <span className="num text-3xl leading-none">{formatScore(entry.role_score.score)}</span>
                 </div>
                 <ScoreBar value={entry.role_score.score} label={`${entry.player.name} role score`} />
                 <EntryBadges entry={entry} />
@@ -246,7 +246,7 @@ function ComparisonView({ data }: { data: Comparison }) {
               <TableCell className="sticky left-0 z-10 bg-paper pl-5">Role score</TableCell>
               {entries.map((entry) => (
                 <TableCell key={entry.player.slug} className="space-y-2 py-4 whitespace-normal">
-                  <span className="block text-4xl leading-none tracking-tight tabular-nums">
+                  <span className="num block text-5xl leading-none">
                     {formatScore(entry.role_score.score)}
                   </span>
                   <ScoreBar value={entry.role_score.score} label={`${entry.player.name} role score`} />
@@ -339,7 +339,7 @@ export function ComparePage() {
                       <span
                         className={cn(
                           'inline-flex items-center gap-2 rounded-md border py-1 pr-1 pl-1.5 text-sm',
-                          missing ? 'border-caution/40 bg-caution-bg text-caution' : 'bg-bone',
+                          missing ? 'border-caution/40 bg-caution-bg text-caution' : 'bg-bone/60',
                         )}
                       >
                         <Letter index={index} />

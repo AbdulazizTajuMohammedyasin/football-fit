@@ -43,7 +43,7 @@ function draftFrom(params: ShortlistParams | null): FilterDraft {
 function Evidence({ rec, metrics }: { rec: Recommendation; metrics: Map<string, MetricDefinition> }) {
   const { fit, role_score: roleScore } = rec
   return (
-    <div className="grid gap-8 border-t bg-bone/70 px-4 py-5 xl:px-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+    <div className="grid gap-8 border-t bg-bone/50 px-4 py-5 xl:px-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
       <section aria-label="Fit score components" className="space-y-3">
         <h4 className="type-sub">Fit score components</h4>
         <p className="text-sm text-ink-2">
@@ -58,7 +58,7 @@ function Evidence({ rec, metrics }: { rec: Recommendation; metrics: Map<string, 
                   {component.label}{' '}
                   <span className="type-label text-ink-2">weight {Math.round(component.weight * 100)}%</span>
                 </span>
-                <span className="text-lg tabular-nums">{formatScore(component.value)}</span>
+                <span className="num text-2xl">{formatScore(component.value)}</span>
               </div>
               <ScoreBar value={component.value} label={component.label} />
               <p className="text-sm text-ink-2">{component.explanation}</p>
@@ -119,7 +119,7 @@ function ResultRow({
           COLUMNS,
         )}
       >
-        <span className={cn('text-lg tabular-nums xl:text-xl', rank <= 3 ? 'text-ink' : 'text-ink-2')}>
+        <span className={cn('num text-2xl xl:text-3xl', rank <= 3 ? 'text-signal' : 'text-ink-2')}>
           <span className="sr-only">Rank </span>
           {rank}
         </span>
@@ -146,7 +146,7 @@ function ResultRow({
         <span className="hidden text-right tabular-nums xl:block">{formatNumber(player.minutes)}</span>
 
         <div className="w-20 space-y-1.5 xl:w-auto">
-          <span className="block text-right text-2xl leading-none tracking-tight tabular-nums xl:text-left">
+          <span className={cn('num block text-right text-3xl leading-none xl:text-left', (fit.score ?? 0) >= 75 && 'glow')}>
             {formatScore(fit.score)}
           </span>
           <ScoreBar value={fit.score} label={`${player.name} fit score`} />
@@ -294,7 +294,7 @@ function RoleWeights({ role }: { role: Role }) {
               <span className="tabular-nums">{Math.round(weight.weight * 100)}%</span>
             </span>
             <span className="block h-1 overflow-hidden rounded-full bg-tissue" aria-hidden>
-              <span className="block h-full bg-ink" style={{ width: `${weight.weight * 100}%` }} />
+              <span className="block h-full bg-signal" style={{ width: `${weight.weight * 100}%` }} />
             </span>
           </li>
         ))}
@@ -340,7 +340,7 @@ function CompareTray({
   if (!selected.length) return null
   return (
     <div className="sticky bottom-3 z-30 mt-4" role="region" aria-label="Players to compare">
-      <div className="flex items-center gap-3 rounded-xl bg-ink p-3 text-on-ink sm:px-4">
+      <div className="flex items-center gap-3 rounded-xl border border-signal/30 bg-tissue/95 p-3 shadow-[0_12px_48px_-12px_rgb(0_0_0/0.8)] backdrop-blur sm:px-4">
         <span className="type-label">
           {selected.length} of {MAX_COMPARE} picked
         </span>
@@ -365,7 +365,7 @@ function CompareTray({
           <Button
             variant="ghost"
             size="sm"
-            className="text-on-ink hover:bg-white/10 hover:text-on-ink"
+            className="text-ink hover:bg-white/10 hover:text-ink"
             onClick={onClear}
           >
             Clear
@@ -377,7 +377,7 @@ function CompareTray({
               </Link>
             </Button>
           ) : (
-            <span className="text-sm text-on-ink-2">Pick one more</span>
+            <span className="text-sm text-ink-2">Pick one more</span>
           )}
         </div>
       </div>
