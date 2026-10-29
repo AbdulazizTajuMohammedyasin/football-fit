@@ -68,6 +68,7 @@ export function NeedMap({ needs, className }: { needs: PositionNeed[]; className
               className={cn(
                 'grid size-11 place-items-center rounded-full border font-mono text-xs font-medium transition-transform group-hover:scale-110',
                 MARKER[need.level] ?? MARKER.unknown,
+                need.level === 'high' && 'pulse-ring',
               )}
             >
               {need.position}

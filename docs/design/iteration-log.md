@@ -155,3 +155,10 @@ Feedback: the round-two look was too close to the original ("nothing changed"). 
 - Every page header, the footer and loading bands use the `.stadium` surface (floodlight gradients plus mowing stripes). The need map is a floodlit green pitch.
 - No data, API, routing or logic changes. `scoreTone` returns colour bands now; its test was updated to match.
 - Checked at 1440 and 390 on home, club, shortlist, player, compare, methodology, sign-in and 404: no overflow, console errors or failed requests. Screenshots: `football-fit-screenshots/round3/v1/` (outside the repo).
+
+### Round 3b: background motion (2026-10-29)
+
+- `.ambient` fixed backdrop: two blurred floodlight glows drift slowly (28 s / 34 s, transform only).
+- `.stadium::before`: a soft beam sweeps across header bands and the footer every 14 s.
+- `.pulse-ring`: high-need markers on the pitch map pulse a coral ring.
+- All three are decorative (`aria-hidden` / pseudo-elements) and are switched off under `prefers-reduced-motion: reduce`.

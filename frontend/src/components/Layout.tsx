@@ -86,6 +86,7 @@ export function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <div className="ambient" aria-hidden />
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-paper focus:px-3 focus:py-2"
