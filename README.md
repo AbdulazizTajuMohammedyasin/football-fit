@@ -8,6 +8,46 @@ published rules. A fit score is a ranking aid, not a prediction that a transfer 
 The core journey: **choose a club → understand its needs → browse a reasoned shortlist →
 inspect player evidence → compare candidates**, with optional accounts for saving shortlists.
 
+## Screenshots
+
+Captured from a local run with Premier League data imported from the FPL public API
+(data as of 24 Oct 2026).
+
+**Choose a club** — the landing page, with every data source and its date listed up front.
+
+![Home page: club picker](docs/screenshots/home.png)
+
+**Understand its needs** — each position gets a 0–100 need score built from quality gap,
+depth gap and ageing, with the evidence behind it.
+
+![Arsenal squad needs](docs/screenshots/club-needs.png)
+
+**Browse a reasoned shortlist** — players ranked by fit score for a specific role, with the
+role's metric weights and working filters alongside.
+
+![Finisher shortlist for Arsenal](docs/screenshots/shortlist.png)
+
+**Inspect player evidence** — role scores, per-metric values and percentiles, data coverage,
+and an explicit note of what the source does not record.
+
+![Player profile: Erling Haaland](docs/screenshots/player.png)
+
+**Compare candidates** — 2–4 players side by side on the same role profile.
+
+![Compare players](docs/screenshots/compare.png)
+
+**How scoring works** — the full method, licences and role weights, generated from the API.
+
+![How scoring works](docs/screenshots/methodology.png)
+
+**Responsive on phones**
+
+<p>
+  <img src="docs/screenshots/home-mobile.png" alt="Home page on a phone" width="260">
+  <img src="docs/screenshots/club-needs-mobile.png" alt="Club needs on a phone" width="260">
+  <img src="docs/screenshots/player-mobile.png" alt="Player profile on a phone" width="260">
+</p>
+
 ## Data sources
 
 | Source | What it is | How to load |
