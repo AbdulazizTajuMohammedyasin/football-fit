@@ -178,7 +178,7 @@ recorded" wording; demo labelling; provenance lines.
 - Gates per milestone: `npm test`, `npm run typecheck`, `npm run lint` (no new warnings), and
   `npm run build` at the end. Backend `pytest` once at the end to confirm nothing outside the
   frontend changed.
-- Screenshots go to `C:\Users\abdul\Desktop\football-fit-screenshots\round2\<milestone>\`, outside
+- Screenshots go to a local folder, outside
   the repo.
 
 ## 10. Milestones and acceptance criteria

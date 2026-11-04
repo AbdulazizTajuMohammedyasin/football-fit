@@ -17,7 +17,7 @@ against the baseline screenshots.
 
 | What | Where | Notes |
 |---|---|---|
-| Baseline screenshots: 17 routes and states × 2 viewports | `C:\Users\abdul\Desktop\football-fit-screenshots\baseline-2026-10-28\` (outside the repo) | Desktop is 1440×1000, phone is 390×844 (mobile emulation), full-page, at 1× scale. Captured from the local dev servers (`npm run dev`, Django `runserver`) against the local database (FPL import as of 24 Oct 2026, plus the fictional demo league). The signed-in page used mocked API responses with a made-up `testfan` account, so no account was created and no private data appears. |
+| Baseline screenshots: 17 routes and states × 2 viewports | a local folder (outside the repo) | Desktop is 1440×1000, phone is 390×844 (mobile emulation), full-page, at 1× scale. Captured from the local dev servers (`npm run dev`, Django `runserver`) against the local database (FPL import as of 24 Oct 2026, plus the fictional demo league). The signed-in page used mocked API responses with a made-up `testfan` account, so no account was created and no private data appears. |
 | Frontend checks | `frontend/` | `npm test`: 38 passed. `npm run typecheck`: clean. `npm run lint`: 5 warnings (all `only-export-components`), 0 errors. |
 | Backend tests | `backend/`, `pytest` | 97 passed. |
 | Browser tooling | none in the project | No Playwright dependency. Screenshots and interaction checks use a throwaway Chrome DevTools Protocol script outside the repo (Node 24 built-in WebSocket, installed Chrome), which can also mock API responses. |

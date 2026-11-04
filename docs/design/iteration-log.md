@@ -1,6 +1,6 @@
 # Redesign iteration log (round 2)
 
-Screenshots live outside the repo in `C:\Users\abdul\Desktop\football-fit-screenshots\round2\<milestone>\`.
+Screenshots live outside the repo in a local folder.
 Each entry lists what the screenshots showed, what was fixed, and what was checked.
 
 ## M1: tokens, fonts, primitives, shell (2026-10-28)

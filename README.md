@@ -8,6 +8,21 @@ published rules. A fit score is a ranking aid, not a prediction that a transfer 
 The core journey: **choose a club → understand its needs → browse a reasoned shortlist →
 inspect player evidence → compare candidates**, with optional accounts for saving shortlists.
 
+## Highlights
+
+- **Explainable, deterministic scoring.** Role-specific metric weights, position-relative
+  percentiles and data-coverage flags. Every score on screen shows the evidence behind it.
+- **Honest about missing data.** Missing values stay missing, never zero. Each source's licence
+  and as-of date is shown. Fictional demo data is labelled everywhere it appears.
+- **Full-stack TypeScript + Python.** A typed React client with TanStack Query talks to a Django
+  REST API, with JWT accounts (djoser + Simple JWT) for saved shortlists.
+- **Real data pipeline.** An FPL importer, a validated CSV importer that checks the whole file
+  before writing, and a seeded demo-league generator.
+- **Tested and linted.** pytest covers scoring, needs analysis, importers and API behaviour.
+  Vitest covers the UI and URL-driven filters. Ruff and oxlint run on both codebases.
+- **Responsive and accessible.** Labelled controls, keyboard-friendly interactions, and phone
+  layouts for every page.
+
 ## Screenshots
 
 Captured from a local run with Premier League data imported from the FPL public API

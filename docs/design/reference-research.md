@@ -12,8 +12,7 @@ from loading the live sites, which is how the documents were checked.
 | Ramp | https://ramp.com | 1440×1000: first screen, two scrolled sections, a nav hover. 390×844: first screen and the opened phone menu | Product-UI panels are marketing renders of the app, not the logged-in app. Dropdown menus did not open on hover in headless mode. |
 | Dala | https://dala.craftedbygc.com | 1440×1000: 9 captures through a custom scroller (wheel events). 390×844: 6 captures | The first ~3 seconds are a loading screen. The particle visual is WebGL and renders at reduced fidelity headless. |
 
-Screenshots are stored outside the repository (third-party material):
-`C:\Users\abdul\Desktop\football-fit-screenshots\references-2026-10-28\` (contact sheets are named `sheet-*.png`).
+Screenshots are stored outside the repository because they are third-party material.
 
 **Not inspected:** refero.design, saasui.design, mobbin.com and dribbble.com. The user supplied
 specific references instead, so no gallery research was done, and none is claimed.
